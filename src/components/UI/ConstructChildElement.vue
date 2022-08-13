@@ -1,0 +1,468 @@
+<template>
+    <div class="element__child" :class="option.type">
+        <div v-for="child in children" :key="child" style="width: 100%">
+            <construct-button
+                @click="updateOption(children, child)"
+                class="element__ch select"
+                :class="child.selected + ''"
+                v-if="!child.parentElement && child.type == 'select'"
+                :style="child.selected ? 'background:' + elementColor : ''"
+                :id="child.id"
+            >
+                {{ child.valueRU == undefined ? child.value : child.valueRU }}
+            </construct-button>
+            <div v-else-if="child.type == 'input'" style="width: 100%">
+                <input
+                    v-model="child.valueRU"
+                    :class="child.type"
+                    class="element__ch dropdown child__input"
+                    type="text"
+                    :id="child.id"
+                    style="display: flex; width: 100%"
+                    :style="'background:' + elementColor"
+                />
+            </div>
+            <div v-else-if="child.type == 'parent'" style="width: 100%">
+                <div v-if="child.children[0].type == 'color'">
+                    <construct-button
+                        class="element__parent element__ch dropdown"
+                        :class="child.type"
+                        @click="dropDown"
+                        :id="child.id"
+                        :style="'background:' + elementColor"
+                    >
+                        <span>{{ child.valueRU }}</span>
+                    </construct-button>
+                    <div
+                        class="element__ch dropdown hideOtherChild"
+                        :class="child.children[0].type"
+                        :id="child.children[0].id"
+                        v-if="child.children[0].valueRU"
+                        style="padding: 0; display: none"
+                        :style="'background:' + elementColor"
+                    >
+                        <input
+                            style="width: 100%; max-height: 22px; border: none"
+                            :style="'background:' + elementColor"
+                            :id="child.id"
+                            type="color"
+                            :value="child.children[0].valueRU"
+                            @change="
+                                child.children[0].valueRU = $event.target.value
+                            "
+                            name="head"
+                        />
+                    </div>
+                    <input
+                        class="element__ch dropdown child__input hideOtherChild"
+                        :class="child.children[0].type"
+                        :id="child.children[0].id"
+                        v-else-if="child.valueRU"
+                        v-model="child.valueRU"
+                        type="text"
+                        :style="'background:' + elementColor"
+                    />
+                </div>
+                <div
+                    v-if="child.children[0].type == 'select'"
+                    style="position: relative"
+                >
+                    <construct-button
+                        class="element__parent element__ch dropdown"
+                        :class="child.type"
+                        @click="dropDown"
+                        :id="child.id"
+                        :style="'background:' + elementColor"
+                    >
+                        <span>{{ child.valueRU }}</span>
+                    </construct-button>
+                    <div
+                        style="
+                            display: none;
+                            position: absolute;
+                            width: 170%;
+                            left: 100%;
+                            top: 0px;
+                            flex-direction: column;
+                        "
+                        class="hideOtherChild"
+                    >
+                        <div v-for="ch in child.children" :key="ch.id">
+                            <construct-button
+                                @click="updateOption(child.children, ch)"
+                                class="element__ch select"
+                                :class="ch.selected + ''"
+                                v-if="
+                                    !child.children[0].parentElement &&
+                                    child.children[0].type == 'select'
+                                "
+                                :style="
+                                    ch.selected
+                                        ? 'background:' + elementColor
+                                        : ''
+                                "
+                                :id="ch.id"
+                            >
+                                {{
+                                    ch.valueRU == undefined
+                                        ? ch.value
+                                        : ch.valueRU
+                                }}
+                            </construct-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <construct-button
+                @click="unchecked($event, child)"
+                class="element__ch dropdown checkbox"
+                :class="child.selected + ''"
+                :id="child.id"
+                v-if="child.type == 'checkbox'"
+                :style="child.selected ? 'background:' + elementColor : ''"
+            >
+                {{ child.valueRU != undefined ? child.valueRU : child.value }}
+            </construct-button>
+        </div>
+        <!-- parent -->
+        <vuedraggable
+            style="display: flex; position: absolute"
+            :list="children"
+            animation="150"
+        >
+            <div v-for="child in children" :key="child">
+                <div v-if="child.type == 'column'" style="position: relative">
+                    <construct-button
+                        class="element__parent element__ch dropdown"
+                        :class="child.type"
+                        @click="dropDown"
+                        :id="child.id"
+                        :style="
+                            child.children[1].selected
+                                ? 'background:#ccc'
+                                : 'background:' + elementColor
+                        "
+                    >
+                        <span>{{ child.valueRU }}</span>
+                    </construct-button>
+                    <div
+                        class="
+                            element__child
+                            dropdown
+                            child__input
+                            hideOtherChild
+                        "
+                        style="
+                            display: none;
+                            flex-direction: column;
+                            width: 100%;
+                        "
+                    >
+                        <input
+                            v-model="child.valueRU"
+                            class="child__input"
+                            style="
+                                display: flex;
+                                margin-bottom: 2px;
+                                padding-left: 6px;
+                                border: none;
+                                color: white;
+                                width: calc(100% - 4px);
+                            "
+                            :style="
+                                child.children[1].selected
+                                    ? 'background:#ccc;pointer-events: none;'
+                                    : 'background:' + elementColor
+                            "
+                            type="text"
+                            :id="child.children[0].id"
+                        />
+                        <!-- Rounded switch -->
+                        <div
+                            v-if="child.children[1].type != 'hide'"
+                            @click="checkedInput"
+                            class="element__ch dropdown checkbox"
+                            :style="
+                                child.children[1].selected
+                                    ? 'background:#ccc'
+                                    : 'background:' + elementColor
+                            "
+                            style="min-height: 16px; width: 100%"
+                        >
+                            <label
+                                class="switch"
+                                :id="child.children[1].id"
+                                :class="child.children[1].type"
+                                @click="sliderRound"
+                            >
+                                <input
+                                    type="checkbox"
+                                    v-model="child.children[1].selected"
+                                />
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <!-- Отображать -->
+                    </div>
+                </div>
+            </div>
+        </vuedraggable>
+
+        <div v-for="child in children" :key="child">
+            <div
+                v-if="
+                    child.type == 'parent' &&
+                    child.children[0].type == 'draggable'
+                "
+                style="position: relative"
+            >
+                <construct-button
+                    class="element__parent element__ch dropdown"
+                    :style="'background:' + elementColor"
+                    :class="child.type"
+                    :id="child.id"
+                    @click="dropDown"
+                >
+                    {{ child.valueRU }}
+                </construct-button>
+                <!-- parent -->
+                <vuedraggable
+                    style="
+                        flex-direction: column;
+                        position: absolute;
+                        width: 100%;
+                        left: 100%;
+                        top: 0px;
+                    "
+                    :list="child.children"
+                    animation="150"
+                    class="hideOtherChild"
+                >
+                    <div v-for="ch in child.children" :key="ch">
+                        <construct-button
+                            class="element__ch dropdown"
+                            :class="ch.type"
+                            :id="ch.id"
+                            style="padding: 0"
+                            :style="'background:' + elementColor"
+                        >
+                            {{ ch.value }}
+                        </construct-button>
+                    </div>
+                </vuedraggable>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+import { VueDraggableNext } from "vue-draggable-next";
+export default {
+    components: { vuedraggable: VueDraggableNext },
+    name: "child-element",
+    props: {
+        children: {
+            Type: Array,
+            required: true,
+        },
+        option: {
+            Type: Array,
+            required: true,
+        },
+        elementColor: {
+            Type: String,
+            required: false,
+        },
+        elements: {
+            Type: Array,
+            required: true,
+        },
+    },
+    emits: ["update"],
+    methods: {
+        inputColor(ev, child) {
+            let childId = document.querySelector("#" + child.id);
+            child.valueRU = ev.target.value;
+        },
+        sliderRound(ev) {
+            if (ev.target.offsetWidth > 0) {
+                var style = ev.target.style;
+                style.setProperty(
+                    "--offset",
+                    `translateX(${ev.target.offsetWidth - 10}px)`
+                );
+            }
+        },
+        hideOther(el) {
+            document.querySelectorAll(".hideOtherChild").forEach((element) => {
+                if (el != element) {
+                    element.style.display = "none";
+                    element.classList.add("hidden");
+                }
+            });
+        },
+        checkedInput(ev) {
+            let checkedInput = document.querySelectorAll(
+                "input:checked+.slider:before"
+            );
+            console.log(ev.target, checkedInput);
+        },
+        unchecked(ev, child) {
+            if (child.type == "checkbox") {
+                if (child.selected == true) {
+                    ev.target.style.background = "#ccc";
+                    return (child.selected = false);
+                } else if (child.selected == false) {
+                    console.log(child);
+                    ev.target.style.background = this.elementColor; // "#3b82ec"
+                    return (child.selected = true);
+                }
+            }
+        },
+        dropDown(ev) {
+            if (ev.target.classList.contains("element__parent")) {
+                let dropDown = ev.target.nextElementSibling;
+                if (dropDown.style.display == "flex") {
+                    dropDown.style.display = "none";
+                    dropDown.classList.add("hidden");
+                } else {
+                    this.hideOther(dropDown);
+                    dropDown.classList.remove("hidden");
+                    dropDown.style.display = "flex";
+                }
+            } else {
+                let dropDown = ev.target.parentElement.nextElementSibling;
+                if (dropDown.style.display == "flex") {
+                    dropDown.style.display = "none";
+                    dropDown.classList.add("hidden");
+                } else {
+                    this.hideOther(dropDown);
+                    dropDown.classList.remove("hidden");
+                    dropDown.style.display = "flex";
+                }
+            }
+        },
+        updateOption(children, child) {
+            if (children.length != undefined) {
+                for (let i3 = 0; i3 < children.length; i3++) {
+                    let ch = children[i3];
+                    document.querySelector("#" + ch.id).style.background =
+                        "#ccc";
+                    ch.selected = false;
+                }
+                console.log(children, child, this.elementColor);
+                document.querySelector("#" + child.id).style.background =
+                    this.elementColor; // "#3b82ec"
+                console.log("One: ", children[0]);
+                child.selected = true;
+                return console.log("Two: ", child);
+            }
+        },
+        submitInput(ev, child) {
+            let inputValue = ev.target.value,
+                inputId = ev.target.getAttribute("id");
+
+            if (child.type == "input" && child.id == inputId) {
+                ev.target.style.display = "none";
+                return (child.value = inputValue);
+            }
+        },
+    },
+};
+</script>
+
+<style>
+.hide {
+    display: none;
+}
+.element-options {
+    position: relative;
+}
+.element__parent.element__ch.column {
+    padding-right: 10px;
+}
+.element__child {
+    display: none;
+    /* display: flex; */
+    border-radius: 0;
+    margin-top: 2px;
+    top: 100%;
+    left: 0;
+    right: 0;
+    position: absolute;
+    z-index: 1;
+    height: 22px;
+}
+.element__child .element__ch {
+    min-width: calc(100% - 4px);
+    /* max-width: 80px; */
+    margin-bottom: 2px;
+    border-radius: 0;
+    height: 22px;
+    cursor: pointer;
+}
+.element__child.select {
+    /* display: flex; */
+    flex-direction: column;
+}
+.element__ch.select {
+    width: calc(100% - 4px);
+    white-space: nowrap;
+    overflow: hidden;
+}
+.element__ch.checkbox.false {
+    background-color: #ccc;
+}
+.element__ch.select.false {
+    background-color: #ccc;
+}
+.element__ch.input {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 50px;
+}
+
+.element__ch.dropdown {
+    padding: 0 5px 0 10px;
+    margin-right: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.element__ch.dropdown > i {
+    padding-left: 10px;
+}
+
+.element__dropdowns {
+    position: absolute;
+    left: calc(100% - 2px);
+    left: 0;
+    display: none;
+}
+
+.element__dropdowns .element__ch {
+    margin-top: 2px;
+    margin-right: 2px;
+}
+
+.element__ch.child__input {
+    height: 22px;
+    border: none;
+    background-color: #3b82ec;
+    color: white;
+    width: calc(100% - 4px);
+    display: none;
+}
+.child__input:focus-visible {
+    outline: none;
+}
+
+/* .input-container {
+    display: flex;
+    justify-content: center;
+} */
+
+/* .element__child .element__ch:last-child {
+	border-radius: 0 0 5px 5px;
+} */
+</style>
