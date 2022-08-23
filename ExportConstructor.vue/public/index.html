@@ -14,10 +14,46 @@
       box-sizing: border-box;
     }
 
+    .model .container-4 input.project-name,
+    .model .container-4 input.project-name::placeholder {
+      background-color: #fff !important;
+      color: #000 !important;
+      height: 40px !important;
+    }
+
+    .model {
+      position: absolute;
+      min-height: 40px;
+      left: 0;
+      right: 0;
+      top: calc(50% - 21px);
+      margin: 0 35px 0 20px;
+      background-color: #ccc;
+      padding: 12px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+    }
+
+    .model button {
+      height: 40px;
+      user-select: none;
+    }
+
+    .model__title {
+      margin-right: 12px;
+      font-size: 21px;
+      user-select: none;
+    }
+
     .error {
       margin-left: 10px;
       color: red;
       display: none;
+    }
+
+    .groupErr {
+      border: 2px solid red
     }
 
     body {
@@ -809,6 +845,7 @@
       background-color: #ccc;
       -webkit-transition: .4s !important;
       transition: .4s !important;
+      outline: .4px solid #2196F3;
     }
 
     .slider:before {
@@ -822,6 +859,7 @@
       background-color: white;
       -webkit-transition: .4s !important;
       transition: .4s !important;
+      left: 2px;
     }
 
     input:checked+.slider {
@@ -839,7 +877,7 @@
     input:checked+.slider:before {
       /* -webkit-transform: translateX(22px) !important;
       -ms-transform: translateX(22px) !important; */
-      transform: var(--offset);
+      left: calc(100% - 9px);
       /* right: 0; */
     }
 
@@ -863,11 +901,18 @@
       padding-left: 0;
       margin: 0
     }
+
+    .hide {
+      display: none !important;
+    }
   </style>
 </head>
 
 <body>
   <div class="body__content">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css"
+      integrity="sha512-1sCRPdkRXhBV2PBLUdRb4tMg1w2YPf37qatUFeS7zlBy7jJI8Lf4VHwWfZZfpXtYSLy85pkm9GaYVYMfw5BC1A=="
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
       integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g=="
       crossorigin="anonymous" referrerpolicy="no-referrer" />

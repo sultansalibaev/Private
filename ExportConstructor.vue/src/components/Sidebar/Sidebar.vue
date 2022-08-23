@@ -1,6 +1,6 @@
 <template>
 	<div class="_sidebar">
-		<Menu :newElements="newElements" :elements="elements"></Menu>
+		<Menu :additional="additional" :newElements="newElements" :elements="elements"></Menu>
 		<!-- <Buttons :elements="elements"></Buttons> -->
 		<Buttons :additional="additional" :elements="newElements" @loadingSpinner="loadingSpinner" :loading="loading"></Buttons>
 	</div>

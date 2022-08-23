@@ -11,6 +11,7 @@
                     :id="option.id"
                     class="element__parent"
                     :style="'background:' + elementColor"
+                    :title="option.description ? option.description : ''"
                 >
                     {{
                         option.valueRU != undefined
@@ -30,12 +31,36 @@
             <div v-else-if="option.type == 'hide'">
                 <!-- Hide option -->
             </div>
-            <div v-else-if="option.parentElement">
+            <div v-else-if="option.parentElement && (option.value != 'columns' && option.value != 'list_rows')">
                 <construct-button
-                    class="element__parent"
+                    :class="
+                        option.position == 'center'
+                            ? 'element__parent-center ' + option.type
+                            : option.type + ' element__parent'
+                    "
                     :style="'background:' + elementColor"
+                    v-if="option.value == 'title'"
+                    @click="saveInput(option)"
+                    :id="option.id"
+                    :title="option.description ? option.description : ''"
+                >
+                    {{
+                        option.valueRU != undefined
+                            ? option.valueRU
+                            : option.value
+                    }}
+                </construct-button>
+                <construct-button
+                    :class="
+                        option.position == 'center'
+                            ? 'element__parent-center ' + option.type
+                            : option.type + ' element__parent'
+                    "
+                    :style="'background:' + elementColor"
+                    v-else
                     @click="dropDown"
                     :id="option.id"
+                    :title="option.description ? option.description : ''"
                 >
                     {{
                         option.valueRU != undefined
@@ -58,6 +83,7 @@
                     :style="option.selected ? 'background:' + elementColor : ''"
                     @click="dropDown"
                     :id="option.id"
+                    :title="option.description ? option.description : ''"
                 >
                     {{
                         option.valueRU != undefined
@@ -74,12 +100,37 @@
                     class="hideOther"
                 ></child-element>
             </div>
-            <div v-else-if="option.value == 'columns'">
+            <div v-else-if="option.value == 'columns' && (options[0].selected == true || options[0].selected == undefined)">
                 <construct-button
                     class="element__parent"
                     :style="'background:' + elementColor"
                     @click="dropDown"
                     :id="option.id"
+                    :title="option.description ? option.description : ''"
+                >
+                    {{
+                        option.valueRU != undefined
+                            ? option.valueRU
+                            : option.value
+                    }}
+                </construct-button>
+                <child-element
+                    :elements="elements"
+                    @update="updateOption"
+                    :children="option.children"
+                    :element="element"
+                    :elementColor="elementColor"
+                    :option="option"
+                    class="hideOther"
+                ></child-element>
+            </div>
+            <div v-else-if="option.value == 'list_rows' && options[0].selected == false">
+                <construct-button
+                    class="element__parent"
+                    :style="'background:' + elementColor"
+                    @click="dropDown"
+                    :id="option.id"
+                    :title="option.description ? option.description : ''"
                 >
                     {{
                         option.valueRU != undefined
@@ -104,6 +155,7 @@
                     :id="option.id"
                     :class="option.selected + ''"
                     :style="option.selected ? 'background:' + elementColor : ''"
+                    :title="option.description ? option.description : ''"
                 >
                     {{
                         option.valueRU != undefined
@@ -114,8 +166,9 @@
             </div>
             <construct-button
                 :id="option.id"
-                v-else-if="option.position == undefined"
+                v-else-if="option.position == undefined && (option.value != 'columns' && option.value != 'list_rows')"
                 :style="'background:' + elementColor"
+                    :title="option.description ? option.description : ''"
             >
                 {{
                     option.valueRU != undefined ? option.valueRU : option.value
@@ -146,6 +199,10 @@ export default {
             Type: Array,
             required: true,
         },
+        model: {
+            Type: Object,
+            required: true,
+        },
     },
     emits: ["update"],
     methods: {
@@ -159,12 +216,15 @@ export default {
         },
         dropDown(ev) {
             let dropDown = ev.target.nextElementSibling;
+            let hideDropDown = true;
             if (dropDown.style.display == "none") {
                 this.hideOther(dropDown);
+                hideDropDown = false;
                 dropDown.classList.remove("hidden");
                 dropDown.style.display = "flex";
                 ev.target.style.borderRadius = "5px 5px 0 0";
             } else {
+                hideDropDown = true;
                 dropDown.style.display = "none";
                 dropDown.classList.add("hidden");
                 ev.target.style.borderRadius = "5px";
@@ -174,6 +234,81 @@ export default {
             //     console.log(el.classList.contains('select'));
             //     console.log(el.classList.contains('input'));
             // });
+
+            let elementChildrenCenter = document.querySelectorAll(
+                ".element__child-center"
+            );
+            let elementParentsCenter = document.querySelectorAll(
+                ".element__parent-center"
+            );
+            let elementChildren = document.querySelectorAll(".element__child");
+            let elementParents = document.querySelectorAll(".element__parent");
+
+            this.elementFor(
+                hideDropDown,
+                elementChildrenCenter,
+                elementParentsCenter,
+                true
+            );
+            this.elementFor(hideDropDown, elementChildren, elementParents);
+        },
+        saveInput(option = undefined) {
+            if (option != undefined) {
+                let input = document.querySelector(".model .project-name");
+                let button = document.querySelector(".model button");
+                let elementList = document.querySelector('.content .element-list');
+                console.log("option", option, input);
+                input.value = option.children[0].valueRU;
+                button.setAttribute("id", option.children[0].id);
+
+                elementList.style.filter = "blur(1.4px)";
+                elementList.style.userSelect = "none";
+                elementList.querySelector('div').style.pointerEvents = "none";
+                setTimeout(() => {
+                    this.model.is = true;
+                }, 1);
+
+                document.querySelector(".model").classList.remove("hide");
+            }
+        },
+        elementFor(
+            hideDropDown,
+            elementChildren,
+            elementParents,
+            center = false
+        ) {
+            for (let index = 0; index < elementChildren.length; index++) {
+                const child = elementChildren[index];
+                if (center) {
+                    child.style.left = `${
+                        elementParents[index].offsetWidth / 2
+                    }px`;
+                    child.style.marginLeft = `-${child.offsetWidth / 2}px`;
+                } else {
+                    child.style.right = "0";
+                }
+                let parent =
+                    child.parentElement.firstChild.parentElement.parentElement
+                        .parentElement.parentElement.parentElement;
+                if (hideDropDown) {
+                    // parent.style.height = `${40}px`;
+                } else {
+                    if (child.offsetHeight != 0) {
+                        let multiplus = 0;
+                        if (child.firstChild.innerHTML != undefined) {
+                            multiplus =
+                                child.firstChild.children.length != 0
+                                    ? child.firstChild.children.length - 1
+                                    : 0;
+                        }
+                        parent.style.height = `${
+                            child.offsetHeight *
+                                (child.children.length + multiplus) +
+                            40
+                        }px`;
+                    }
+                }
+            }
         },
         updateOption(optionName, ev) {
             this.$emit("update", optionName, ev);
@@ -221,6 +356,7 @@ export default {
 }
 
 .element {
+    /* transition: .35s; */
     padding-bottom: 0px;
 }
 

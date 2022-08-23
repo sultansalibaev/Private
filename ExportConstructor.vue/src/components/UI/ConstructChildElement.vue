@@ -1,132 +1,160 @@
 <template>
-    <div class="element__child" :class="option.type">
-        <div v-for="child in children" :key="child" style="width: 100%">
-            <construct-button
-                @click="updateOption(children, child)"
-                class="element__ch select"
-                :class="child.selected + ''"
-                v-if="!child.parentElement && child.type == 'select'"
-                :style="child.selected ? 'background:' + elementColor : ''"
-                :id="child.id"
-            >
-                {{ child.valueRU == undefined ? child.value : child.valueRU }}
-            </construct-button>
-            <div v-else-if="child.type == 'input'" style="width: 100%">
-                <input
-                    v-model="child.valueRU"
-                    :class="child.type"
-                    class="element__ch dropdown child__input"
-                    type="text"
+    <div
+        class=""
+        :class="
+            option.position == 'center'
+                ? 'element__child-center ' + option.type
+                : option.type + ' element__child'
+        "
+    >
+        <div v-if="option.type != 'parent'">
+            <div v-for="child in children" :key="child" style="width: 100%">
+                <construct-button
+                    @click="updateOption(children, child)"
+                    class="element__ch select"
+                    :class="child.selected + ''"
+                    v-if="!child.parentElement && child.type == 'select'"
+                    :style="child.selected ? 'background:' + elementColor : ''"
                     :id="child.id"
-                    style="display: flex; width: 100%"
-                    :style="'background:' + elementColor"
-                />
-            </div>
-            <div v-else-if="child.type == 'parent'" style="width: 100%">
-                <div v-if="child.children[0].type == 'color'">
-                    <construct-button
-                        class="element__parent element__ch dropdown"
-                        :class="child.type"
-                        @click="dropDown"
-                        :id="child.id"
-                        :style="'background:' + elementColor"
-                    >
-                        <span>{{ child.valueRU }}</span>
-                    </construct-button>
-                    <div
-                        class="element__ch dropdown hideOtherChild"
-                        :class="child.children[0].type"
-                        :id="child.children[0].id"
-                        v-if="child.children[0].valueRU"
-                        style="padding: 0; display: none"
-                        :style="'background:' + elementColor"
-                    >
-                        <input
-                            style="width: 100%; max-height: 22px; border: none"
-                            :style="'background:' + elementColor"
-                            :id="child.id"
-                            type="color"
-                            :value="child.children[0].valueRU"
-                            @change="
-                                child.children[0].valueRU = $event.target.value
-                            "
-                            name="head"
-                        />
-                    </div>
+                    :title="child.description || ''"
+                >
+                    {{
+                        child.valueRU == undefined ? child.value : child.valueRU
+                    }}
+                </construct-button>
+                <div v-else-if="child.type == 'input'" style="width: 100%">
                     <input
-                        class="element__ch dropdown child__input hideOtherChild"
-                        :class="child.children[0].type"
-                        :id="child.children[0].id"
-                        v-else-if="child.valueRU"
                         v-model="child.valueRU"
+                        :class="child.type"
+                        class="element__ch dropdown child__input"
                         type="text"
+                        :id="child.id"
+                        style="display: flex; width: 100%"
                         :style="'background:' + elementColor"
                     />
                 </div>
-                <div
-                    v-if="child.children[0].type == 'select'"
-                    style="position: relative"
-                >
-                    <construct-button
-                        class="element__parent element__ch dropdown"
-                        :class="child.type"
-                        @click="dropDown"
-                        :id="child.id"
-                        :style="'background:' + elementColor"
-                    >
-                        <span>{{ child.valueRU }}</span>
-                    </construct-button>
+                <div v-else-if="child.type == 'parent'" style="width: 100%">
+                    <div v-if="child.children[0].type == 'color'">
+                        <construct-button
+                            class="element__parent element__ch dropdown"
+                            :class="child.type"
+                            @click="dropDown"
+                            :id="child.id"
+                            :style="'background:' + elementColor"
+                            :title="child.description || ''"
+                        >
+                            <span>{{ child.valueRU }}</span>
+                        </construct-button>
+                        <div
+                            class="element__ch dropdown hideOtherChild"
+                            :class="child.children[0].type"
+                            :id="child.children[0].id"
+                            v-if="child.children[0].valueRU"
+                            style="padding: 0; display: none"
+                            :style="'background:' + elementColor"
+                        >
+                            <input
+                                style="
+                                    width: 100%;
+                                    max-height: 22px;
+                                    border: none;
+                                "
+                                :style="'background:' + elementColor"
+                                :id="child.id"
+                                type="color"
+                                :value="child.children[0].valueRU"
+                                @change="
+                                    child.children[0].valueRU =
+                                        $event.target.value
+                                "
+                                name="head"
+                            />
+                        </div>
+                        <input
+                            class="
+                                element__ch
+                                dropdown
+                                child__input
+                                hideOtherChild
+                            "
+                            :class="child.children[0].type"
+                            :id="child.children[0].id"
+                            v-else-if="child.valueRU"
+                            v-model="child.valueRU"
+                            type="text"
+                            :style="'background:' + elementColor"
+                        />
+                    </div>
                     <div
-                        style="
-                            display: none;
-                            position: absolute;
-                            width: 170%;
-                            left: 100%;
-                            top: 0px;
-                            flex-direction: column;
-                        "
-                        class="hideOtherChild"
+                        v-if="child.children[0].type == 'select'"
+                        style="position: relative"
                     >
-                        <div v-for="ch in child.children" :key="ch.id">
-                            <construct-button
-                                @click="updateOption(child.children, ch)"
-                                class="element__ch select"
-                                :class="ch.selected + ''"
-                                v-if="
-                                    !child.children[0].parentElement &&
-                                    child.children[0].type == 'select'
-                                "
-                                :style="
-                                    ch.selected
-                                        ? 'background:' + elementColor
-                                        : ''
-                                "
-                                :id="ch.id"
-                            >
-                                {{
-                                    ch.valueRU == undefined
-                                        ? ch.value
-                                        : ch.valueRU
-                                }}
-                            </construct-button>
+                        <construct-button
+                            class="element__parent element__ch dropdown"
+                            :class="child.type"
+                            @click="dropDown"
+                            :id="child.id"
+                            :style="'background:' + elementColor"
+                            :title="child.description || ''"
+                        >
+                            <span>{{ child.valueRU }}</span>
+                        </construct-button>
+                        <div
+                            style="
+                                display: none;
+                                position: absolute;
+                                width: 170%;
+                                left: 100%;
+                                top: 0px;
+                                flex-direction: column;
+                            "
+                            class="hideOtherChild"
+                        >
+                            <div v-for="ch in child.children" :key="ch.id">
+                                <construct-button
+                                    @click="updateOption(child.children, ch)"
+                                    class="element__ch select"
+                                    :class="ch.selected + ''"
+                                    v-if="
+                                        !child.children[0].parentElement &&
+                                        child.children[0].type == 'select'
+                                    "
+                                    :style="
+                                        ch.selected
+                                            ? 'background:' + elementColor
+                                            : ''
+                                    "
+                                    :id="ch.id"
+                                >
+                                    {{
+                                        ch.valueRU == undefined
+                                            ? ch.value
+                                            : ch.valueRU
+                                    }}
+                                </construct-button>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <construct-button
+                    @click="unchecked($event, child)"
+                    class="element__ch dropdown checkbox"
+                    :class="child.selected + ''"
+                    :id="child.id"
+                    v-if="child.type == 'checkbox'"
+                    :style="child.selected ? 'background:' + elementColor : ''"
+                    :title="child.description || ''"
+                >
+                    {{
+                        child.valueRU != undefined ? child.valueRU : child.value
+                    }}
+                </construct-button>
             </div>
-            <construct-button
-                @click="unchecked($event, child)"
-                class="element__ch dropdown checkbox"
-                :class="child.selected + ''"
-                :id="child.id"
-                v-if="child.type == 'checkbox'"
-                :style="child.selected ? 'background:' + elementColor : ''"
-            >
-                {{ child.valueRU != undefined ? child.valueRU : child.value }}
-            </construct-button>
         </div>
         <!-- parent -->
         <vuedraggable
-            style="display: flex; position: absolute"
+            v-if="option.type == 'parent'"
+            style="display: flex; position: absolute; left: -200%"
             :list="children"
             animation="150"
         >
@@ -138,10 +166,11 @@
                         @click="dropDown"
                         :id="child.id"
                         :style="
-                            child.children[1].selected
+                            !child.children[child.children.length - 1].selected
                                 ? 'background:#ccc'
                                 : 'background:' + elementColor
                         "
+                        :title="child.description || ''"
                     >
                         <span>{{ child.valueRU }}</span>
                     </construct-button>
@@ -158,98 +187,153 @@
                             width: 100%;
                         "
                     >
-                        <input
-                            v-model="child.valueRU"
-                            class="child__input"
-                            style="
-                                display: flex;
-                                margin-bottom: 2px;
-                                padding-left: 6px;
-                                border: none;
-                                color: white;
-                                width: calc(100% - 4px);
-                            "
-                            :style="
-                                child.children[1].selected
-                                    ? 'background:#ccc;pointer-events: none;'
-                                    : 'background:' + elementColor
-                            "
-                            type="text"
-                            :id="child.children[0].id"
-                        />
-                        <!-- Rounded switch -->
-                        <div
-                            v-if="child.children[1].type != 'hide'"
-                            @click="checkedInput"
-                            class="element__ch dropdown checkbox"
-                            :style="
-                                child.children[1].selected
-                                    ? 'background:#ccc'
-                                    : 'background:' + elementColor
-                            "
-                            style="min-height: 16px; width: 100%"
-                        >
-                            <label
-                                class="switch"
-                                :id="child.children[1].id"
-                                :class="child.children[1].type"
-                                @click="sliderRound"
+                        <div v-for="ch in child.children" :key="ch.id">
+                            <input
+                                v-model="ch.valueRU"
+                                class="child__input"
+                                v-if="ch.type == 'input'"
+                                style="
+                                    display: flex;
+                                    margin-bottom: 2px;
+                                    padding-left: 6px;
+                                    border: none;
+                                    color: white;
+                                    width: calc(100% - 4px);
+                                "
+                                :style="
+                                    !child.children[child.children.length - 1].selected
+                                        ? 'background:#ccc;pointer-events: none;'
+                                        : 'background:' + elementColor
+                                "
+                                type="text"
+                                :id="ch.id"
+                            />
+                            <div
+                                class="element__ch dropdown"
+                                :class="ch.type"
+                                :id="ch.id"
+                                v-else-if="ch.type == 'color'"
+                                style="padding: 0"
+                                :style="
+                                    !child.children[child.children.length - 1].selected
+                                        ? 'background:#ccc;pointer-events: none;'
+                                        : 'background:' + elementColor
+                                "
                             >
                                 <input
-                                    type="checkbox"
-                                    v-model="child.children[1].selected"
+                                    style="
+                                        width: 100%;
+                                        max-height: 22px;
+                                        border: none;
+                                    "
+                                    :style="'background:' + elementColor"
+                                    :id="ch.id"
+                                    type="color"
+                                    :value="ch.valueRU"
+                                    @change="ch.valueRU = $event.target.value"
+                                    name="head"
                                 />
-                                <span class="slider round"></span>
-                            </label>
+                            </div>
+                            <construct-button
+                                @click="unchecked($event, ch)"
+                                class="element__ch dropdown checkbox"
+                                :class="ch.selected + ''"
+                                :id="ch.id"
+                                v-else-if="
+                                    ch.type == 'checkbox' &&
+                                    ch.value != undefined
+                                "
+                                :style="
+                                    !child.children[child.children.length - 1].selected
+                                        ? 'background:#ccc;pointer-events: none;'
+                                        : ch.selected
+                                        ? 'background:' + elementColor
+                                        : ''
+                                "
+                                :title="ch.description || ''"
+                            >
+                                {{
+                                    ch.valueRU != undefined
+                                        ? ch.valueRU
+                                        : ch.value
+                                }}
+                            </construct-button>
+                            <!-- Rounded switch -->
+                            <div
+                                v-if="ch.value == undefined && child.value != 'content'"
+                                @click="checkedInput"
+                                class="element__ch dropdown checkbox"
+                                :style="
+                                    !ch.selected
+                                        ? 'background:#ccc'
+                                        : 'background:' + elementColor
+                                "
+                                style="min-height: 16px; width: 100%"
+                            >
+                                <label
+                                    class="switch"
+                                    :id="ch.id"
+                                    :class="ch.type"
+                                    @click="sliderRound"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        v-model="ch.selected"
+                                    />
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <!-- Отображать -->
                         </div>
-                        <!-- Отображать -->
                     </div>
                 </div>
             </div>
         </vuedraggable>
 
-        <div v-for="child in children" :key="child">
-            <div
-                v-if="
-                    child.type == 'parent' &&
-                    child.children[0].type == 'draggable'
-                "
-                style="position: relative"
-            >
-                <construct-button
-                    class="element__parent element__ch dropdown"
-                    :style="'background:' + elementColor"
-                    :class="child.type"
-                    :id="child.id"
-                    @click="dropDown"
-                >
-                    {{ child.valueRU }}
-                </construct-button>
-                <!-- parent -->
-                <vuedraggable
-                    style="
-                        flex-direction: column;
-                        position: absolute;
-                        width: 100%;
-                        left: 100%;
-                        top: 0px;
+        <div v-if="option.value == 'order'">
+            <div v-for="child in children" :key="child">
+                <div
+                    v-if="
+                        child.type == 'parent' &&
+                        child.children[0].type == 'draggable'
                     "
-                    :list="child.children"
-                    animation="150"
-                    class="hideOtherChild"
+                    style="position: relative"
                 >
-                    <div v-for="ch in child.children" :key="ch">
-                        <construct-button
-                            class="element__ch dropdown"
-                            :class="ch.type"
-                            :id="ch.id"
-                            style="padding: 0"
-                            :style="'background:' + elementColor"
-                        >
-                            {{ ch.value }}
-                        </construct-button>
-                    </div>
-                </vuedraggable>
+                    <construct-button
+                        class="element__parent element__ch dropdown"
+                        :style="'background:' + elementColor"
+                        :class="child.type"
+                        :id="child.id"
+                        @click="dropDown"
+                    >
+                        {{ child.valueRU }}
+                    </construct-button>
+                    <!-- parent -->
+                    <vuedraggable
+                        style="
+                            flex-direction: column;
+                            position: absolute;
+                            width: 100%;
+                            left: 100%;
+                            top: 0px;
+                        "
+                        :list="child.children"
+                        animation="150"
+                        class="hideOtherChild"
+                    >
+                        <div v-for="ch in child.children" :key="ch">
+                            <construct-button
+                                class="element__ch dropdown"
+                                :class="ch.type"
+                                :id="ch.id"
+                                style="padding: 0"
+                                :style="'background:' + elementColor"
+                            >
+                                {{ ch.value }}
+                            </construct-button>
+                        </div>
+                    </vuedraggable>
+                </div>
             </div>
         </div>
     </div>
@@ -285,6 +369,7 @@ export default {
             child.valueRU = ev.target.value;
         },
         sliderRound(ev) {
+            console.log("ev.target", ev.target);
             if (ev.target.offsetWidth > 0) {
                 var style = ev.target.style;
                 style.setProperty(
@@ -381,18 +466,31 @@ export default {
 .element__parent.element__ch.column {
     padding-right: 10px;
 }
+.element__child-center {
+    display: none;
+    /* display: flex; */
+    border-radius: 0;
+    margin-top: 2px;
+    /* top: 100%; */
+    left: 0;
+    /* right: 0; */
+    position: absolute;
+    z-index: 1;
+    height: 22px;
+}
 .element__child {
     display: none;
     /* display: flex; */
     border-radius: 0;
     margin-top: 2px;
-    top: 100%;
+    /* top: 100%; */
     left: 0;
     right: 0;
     position: absolute;
     z-index: 1;
     height: 22px;
 }
+.element__child-center .element__ch,
 .element__child .element__ch {
     min-width: calc(100% - 4px);
     /* max-width: 80px; */
@@ -401,6 +499,7 @@ export default {
     height: 22px;
     cursor: pointer;
 }
+.element__child-center,
 .element__child.select {
     /* display: flex; */
     flex-direction: column;

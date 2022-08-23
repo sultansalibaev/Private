@@ -5,7 +5,7 @@
                 class="fa-solid fa-grip-lines handle"
                 :style="'background:' + elementColor"
             ></i>
-            <span :style="'background:' + elementColor">{{ element }}</span>
+            <span :style="'background:' + elementColor" :title="description">{{ element }}</span>
             <i
                 @click="dropDown"
                 class="fa-solid fa-angle-right"
@@ -28,6 +28,10 @@ export default {
             Type: String,
             required: false,
         },
+        description: {
+            Type: String,
+            required: false,
+        },
     },
     methods: {
         hideOther(el) {
@@ -47,6 +51,10 @@ export default {
             });
         },
         dropDown(ev) {
+            let elements = document.querySelectorAll('.element-list .element');
+            elements.forEach(element => {
+                element.parentElement.style.height = "40px";
+            });
             console.log(ev.target);
             let nextEl = ev.target.nextElementSibling;
             if (nextEl.style.display == "none") {

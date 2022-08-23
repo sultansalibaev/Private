@@ -1,5 +1,5 @@
 <template>
-    <form id="app-cover" :style="'width:'+selectArray.selectWidth">
+    <form id="app-cover" :style="'width:' + selectArray.selectWidth">
         <div id="select-box">
             <input type="checkbox" id="options-view-button" />
             <div id="select-button" class="brd">
@@ -16,37 +16,65 @@
                     class="option"
                     v-for="option in selectArray.options"
                     :key="option.id"
-                    :style="option.disabled == 'disabled' ? 'color:#2d3667;background: #ccc;pointer-events:none':''"
+                    :style="
+                        option.disabled == 'disabled'
+                            ? 'color:#2d3667;background: #ccc;pointer-events:none'
+                            : ''
+                    "
                 >
                     <input
                         class="s-c top"
                         type="radio"
                         name="platform"
                         value="behance"
-						v-if="option.checked == 'checked'"
-						@change="selectCheckedName(option.name)"
-						checked
+                        v-if="option.checked == 'checked'"
+                        @change="selectCheckedName(option.name)"
+                        checked
                     />
                     <input
                         class="s-c top"
                         type="radio"
                         name="platform"
                         value="behance"
-						v-else-if="option.disabled == 'disabled'"
-						disabled
+                        v-else-if="option.disabled == 'disabled'"
+                        disabled
                     />
                     <input
                         class="s-c top"
                         type="radio"
                         name="platform"
                         value="behance"
-						@change="selectCheckedName(option.name)"
-						v-else
+                        @change="selectCheckedName(option.name)"
+                        v-else
                     />
-                    <i v-if="option.iconClass" :class="option.iconClass"
-                    :style="option.disabled == 'disabled' ? 'color:#f7f7f7;':''"></i>
-                    <span class="label" :style="option.disabled == 'disabled' ? 'color:#f7f7f7;':'' || option.iconClass ? '' : 'margin-left:0px;'">{{ option.name }}</span>
-                    <span class="opt-val" :style="'width:calc('+selectArray.selectWidth+' - 40px)'">{{ option.name }}</span>
+                    <i
+                        v-if="option.iconClass"
+                        :class="option.iconClass"
+                        :style="
+                            option.disabled == 'disabled'
+                                ? 'color:#f7f7f7;'
+                                : ''
+                        "
+                        aria-hidden="true"
+                    ></i>
+                    <span
+                        class="label"
+                        :style="
+                            option.disabled == 'disabled'
+                                ? 'color:#f7f7f7;'
+                                : '' || option.iconClass
+                                ? ''
+                                : 'margin-left:0px;'
+                        "
+                        >{{ option.name }}</span
+                    >
+                    <span
+                        class="opt-val"
+                        :style="
+                            'width:calc(' + selectArray.selectWidth + ' - 40px)'
+                        "
+                        >{{ option.name }}</span
+                    >
                 </div>
                 <div id="option-bg"></div>
             </div>
@@ -66,16 +94,115 @@ export default {
             type: Object,
             required: true,
         },
-	},
-	methods: {
-		selectCheckedName: function(optionName) {
-			if (this.selectArray.selectName == 'Формат экспорта') {
-				this.additional.format.file = optionName.toLowerCase();
-			} else if (this.selectArray.selectName == 'Язык') {
-				this.additional.format.language = optionName.toLowerCase();
-			}
-		},
-	}
+        elementLanguageList: {
+            type: Array,
+            required: false,
+        },
+        elements: {
+            type: Array,
+            required: false,
+        },
+        defaultPDFValues: {
+            type: Object,
+            required: false,
+        },
+    },
+    methods: {
+        selectCheckedName: function (optionName) {
+            if (this.selectArray.selectName == "Формат") {
+                this.additional.format.file = optionName.toLowerCase();
+                let elementsLength = this.elements.length;
+                for (let index = 0; index < elementsLength; index++) {
+                    this.elements.splice(this.elements[index], 1);
+                }
+                let menuElements = document.querySelectorAll(".menu .element");
+                menuElements.forEach((menuElement) => {
+                    menuElement.style.background = "#4678a6";
+                });
+                console.log("this.elements", this.elements);
+            } else if (this.selectArray.selectName == "Язык") {
+                this.additional.format.language = optionName.toLowerCase();
+
+                for (
+                    let index = 0;
+                    index < this.elementLanguageList.length;
+                    index++
+                ) {
+                    const element = this.elementLanguageList[index];
+                    if (element.options[0].value == "title") {
+                        element.options[0].children[0].valueRU =
+                            this.defaultPDFValues[element.name].title[
+                                this.additional.format.language
+                            ];
+
+                        if (element.type == "table") {
+                            let columns = element.options[1];
+                            for (let i = 0; i < columns.children.length; i++) {
+                                const column = columns.children[i];
+                                if (
+                                    this.defaultPDFValues[element.name].columns[
+                                        column.value
+                                    ]
+                                ) {
+                                    column.valueRU =
+                                        column.children[0].valueRU =
+                                            this.defaultPDFValues[
+                                                element.name
+                                            ].columns[column.value][
+                                                this.additional.format.language
+                                            ];
+                                }
+                            }
+                        }
+                    }
+                }
+                for (let index = 0; index < this.elements.length; index++) {
+                    const element = this.elements[index];
+                    if (element.options[0].value == "title") {
+                        element.options[0].children[0].valueRU =
+                            this.defaultPDFValues[element.name].title[
+                                this.additional.format.language
+                            ];
+                        if (element.type == "table") {
+                            let columns = element.options[1];
+                            for (let i = 0; i < columns.children.length; i++) {
+                                const column = columns.children[i];
+                                if (
+                                    this.defaultPDFValues[element.name].columns[
+                                        column.value
+                                    ]
+                                ) {
+                                    column.valueRU =
+                                        column.children[0].valueRU =
+                                            this.defaultPDFValues[
+                                                element.name
+                                            ].columns[column.value][
+                                                this.additional.format.language
+                                            ];
+                                }
+                            }
+                        }
+                        let modelIndex = document
+                            .querySelector(".model-btn")
+                            .getAttribute("id");
+                        if (
+                            modelIndex &&
+                            element.id == modelIndex.split("_")[0]
+                        ) {
+                            document.querySelector(
+                                ".model .project-name"
+                            ).value = element.options[0].children[0].valueRU;
+                        }
+                    }
+                }
+            } else if (this.selectArray.selectName == "Пейзаж") {
+                this.additional.orientation =
+                    optionName == "Пейзаж" ? "landscape" : "portrait";
+            } else if (this.selectArray.selectName == "Menu") {
+                this.additional.menu = optionName == "Шаблон" ? true : false;
+            }
+        },
+    },
 };
 </script>
 
@@ -155,7 +282,7 @@ export default {
 #chevrons i {
     display: block;
     height: 50%;
-	width: 15px;
+    width: 15px;
     color: #d1dede;
     font-size: 12px;
     text-align: right;
@@ -199,6 +326,7 @@ export default {
     left: 14px;
     padding: 0;
     display: none;
+    font-size: 16px !important;
 }
 
 #options-view-button:checked ~ #options .option i {
@@ -227,6 +355,7 @@ export default {
 
 .s-c.top {
     top: 0;
+    height: 100%;
 }
 
 .s-c.bottom {
@@ -361,6 +490,13 @@ input[type="radio"] {
 .option:nth-child(3) input[type="radio"]:checked ~ .opt-val {
     top: -111px;
 }
+.option:nth-child(4) input[type="radio"]:checked ~ .label:before {
+    background-color: yellow;
+}
+
+.option:nth-child(4) input[type="radio"]:checked ~ .opt-val {
+    top: -151px;
+}
 
 .option .fa-codepen {
     color: #000;
@@ -419,6 +555,10 @@ input[type="radio"] {
 .option:nth-child(3):hover ~ #option-bg {
     top: 80px;
     background-color: #00ad0f;
+}
+.option:nth-child(4):hover ~ #option-bg {
+    top: 120px;
+    background-color: #ebeb0e;
 }
 
 .fa-file-word:before {

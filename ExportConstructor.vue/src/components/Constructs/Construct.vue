@@ -5,7 +5,7 @@
             :list="elements"
             :move="checkMove"
             handle=".handle"
-            animation="150"
+            animation="250"
             style="min-height: 80.2vh"
         >
             <div v-for="element in elements" :key="element.id">
@@ -15,10 +15,12 @@
                     :elementColor="element.color"
                     v-if="element.name != 'Group'"
                     :class="element.groups"
+                    :description="element.description ? element.description : ''"
                 >
                     <next-element
                         @update="updateOption"
                         :options="element.options"
+                        :model="model"
                         :elementColor="element.color"
                         :elements="elements"
                     >
@@ -30,7 +32,7 @@
                 </construct-element>
                 <div class="new-list" v-else>
                     <div class="group-header">
-                        <div class="group-header__title handle">Группа</div>
+                        <div class="group-header__title handle" :title="element.description ? element.description : ''">Группа</div>
                         <div
                             class="group-header__ungroup"
                             :id="element.id"
@@ -39,13 +41,13 @@
                             Разгруппировать
                         </div>
                     </div>
-                    <hr />
+                    <hr class="hr" />
                     <vuedraggable
                         group="todosapp"
                         :list="element.group"
                         :class="element.name"
-                        animation="150"
-                        style="padding: 10px 0 10px 0"
+                        animation="250"
+                        style="padding: 18px 0"
                     >
                         <div
                             v-if="element.name == 'Group'"
@@ -56,10 +58,12 @@
                                 :element="group.nameRU"
                                 :elementColor="group.color"
                                 v-if="group"
+                                :description="group.description ? group.description : ''"
                             >
                                 <next-element
                                     @update="updateOption"
                                     :options="group.options"
+                                    :model="model"
                                     :elementColor="group.color"
                                     :elements="elements"
                                 >
@@ -71,7 +75,7 @@
                             </construct-element>
                         </div>
                     </vuedraggable>
-                    <span class="error">Не менее двух элементов!</span>
+                    <span class="error">Должно быть два элемента!</span>
                 </div>
             </div>
         </vuedraggable>
@@ -105,28 +109,27 @@ export default {
             type: Boolean,
             required: true,
         },
+        model: {
+            type: Object,
+            required: true,
+        },
     },
     emits: ["update"],
     methods: {
         checkMove(evt) {
             console.log(evt.to, evt);
             if (!evt.to.classList.contains("Group")) {
-                let groups = document.querySelectorAll(".Group");
-                for (let i = 0; i < groups.length; i++) {
-                    let group = groups[i];
-                    if (group.children.length < 1) {
-                        group.parentElement.style.border = "2px solid red";
-                        group.nextElementSibling.style.display = "inline";
-                    } else {
-                        group.parentElement.style.border = "none";
-                        group.nextElementSibling.style.display = "none";
-                    }
-                }
                 return true;
             } else if (
+                evt.to.classList.contains("Group") &&
                 evt.dragged.firstChild.classList.contains("groups") &&
                 evt.to.children.length < 2
             ) {
+                let group = evt.to;
+                if (group.children.length == 1) {
+                    group.parentElement.classList.remove("groupErr");
+                    group.nextElementSibling.style.display = "none";
+                }
                 console.log(
                     "My evt " +
                         evt.dragged.firstChild.classList.contains("groups"),
@@ -263,6 +266,7 @@ export default {
     justify-content: space-between;
     align-items: center;
     padding: 5px;
+    user-select: none;
 }
 .group-header__title {
     margin-left: 10px;
@@ -281,5 +285,12 @@ export default {
     background-color: #ccc;
     border-radius: 5px;
     margin: 3px 0;
+}
+.hr {
+    margin: 0;
+    margin-top: 2px;
+}
+.handle {
+    cursor: pointer;
 }
 </style>

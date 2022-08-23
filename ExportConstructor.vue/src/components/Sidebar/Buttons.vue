@@ -46,18 +46,24 @@ export default {
         async postSettings(ev) {
             let groups = document.querySelectorAll(".Group");
 
+            let errCount = 0;
+
             for (let i = 0; i < groups.length; i++) {
                 let group = groups[i];
-                if (group.children.length < 2) {
-                    group.parentElement.style.border = "2px solid red";
+                if (group.children.length < 2 || group.children.length > 2) {
+                    group.parentElement.classList.add("groupErr");
                     group.nextElementSibling.style.display = "inline";
-                    return;
+                    errCount++;
                 } else {
-                    group.parentElement.style.border = "none";
+                    group.parentElement.classList.remove("groupErr");
                     group.nextElementSibling.style.display = "none";
                 }
             }
-            let projectName = document.querySelector("#project-name").value; // Мой Шаблон
+            if (errCount > 0) {
+                return;
+            }
+            let projectName =
+                document.querySelector(".box .project-name").value; // Мой Шаблон
             if (projectName) {
                 console.log("project-name:", projectName);
             } else {
@@ -66,7 +72,6 @@ export default {
             }
 
             this.loadingSpinner();
-            console.log("this.loading:", this.loading);
 
             if (this.loading == true) {
                 return;
@@ -77,7 +82,6 @@ export default {
             let independentCopy = JSON.parse(
                 JSON.stringify([...this.elements])
             );
-            console.log(independentCopy);
             let i = 0;
             let index = 0;
             for (let p = independentCopy.length - 1; p >= 0; p--) {
@@ -100,12 +104,6 @@ export default {
                                     .position != undefined
                             ) {
                                 index = i;
-                                console.log(
-                                    "Position is : ",
-                                    groupEl.options[groupEl.options.length - 1]
-                                        .position,
-                                    groupEl.options
-                                );
                                 request.push({
                                     id: groupEl.name,
                                     position:
@@ -119,12 +117,6 @@ export default {
                             } else {
                                 index = i;
                                 ++newIndex;
-                                console.log(
-                                    "Position is : ",
-                                    groupEl.options[groupEl.options.length - 1]
-                                        .position,
-                                    groupEl.options
-                                );
                                 request.push({
                                     id: groupEl.name,
                                     position: index + 1 + "_" + newIndex,
@@ -140,7 +132,6 @@ export default {
             for (let i = 0; i < request.length; i++) {
                 if (request[i].position.indexOf("_") > -1) {
                     let el = request[i];
-                    console.log(request[i + 1], request[i]);
                     if (request[i + 1] != undefined) {
                         request[i] = request[i + 1];
                         request[i + 1] = el;
@@ -208,7 +199,6 @@ export default {
                                                 option.selected;
                                         }
                                     } else if (option.children != undefined) {
-                                    console.log('option.children[0].valueRU', option.children[0].valueRU);
                                         request[reverse][option.value] =
                                             option.children[0].valueRU;
                                     }
@@ -224,27 +214,26 @@ export default {
                         reverse = request.length - j;
                     }
                     if (element.name == request[reverse].id) {
-                        console.log(
-                            element.name.substr(3, element.name.length - 3) ==
-                                "_table"
-                        );
-                        if (
-                            element.name.substr(3, element.name.length - 3) ==
-                            "_table"
-                        ) {
+                        if (element.type == "table") {
                             if (element.options.length != undefined) {
                                 for (
                                     let i2 = 0;
                                     i2 < element.options.length;
                                     i2++
                                 ) {
-                                    let option = element.options[i2];
+                                    let option = element.options[i2],
+                                        tableSelected = true;
+                                    if (element.options[0].value == 'table') {
+                                        tableSelected = element.options[0].selected;
+                                    }
 
                                     if (option.value == "title") {
-                                    console.log('option.children[0].valueRU', option.children[0].valueRU);
                                         request[reverse][option.value] =
                                             option.children[0].valueRU;
-                                    } else if (option.value == "columns") {
+                                    } else if (
+                                        option.value == "columns" && tableSelected ||
+                                        option.value == "list_rows" && !tableSelected
+                                    ) {
                                         request[reverse][option.value] = [];
                                         let hideColumnsCount = 0;
                                         for (
@@ -253,25 +242,47 @@ export default {
                                             i3++
                                         ) {
                                             const child = option.children[i3];
-                                            const ch = child.children[0];
-                                            if (ch.type == "input") {
-                                                console.log('undefined - ch.value', ch.value);
-                                                request[reverse][option.value][
-                                                    i3
-                                                ] = {
+                                            request[reverse][option.value][i3] =
+                                                {
                                                     id: child.value,
-                                                    position: child.children[1]
-                                                        .selected
+                                                    position: !child.children[
+                                                        child.children.length -
+                                                            1
+                                                    ].selected
                                                         ? 0
                                                         : i3 +
                                                           1 -
                                                           hideColumnsCount,
-                                                    name: ch.value,
                                                 };
-                                                if (
-                                                    child.children[1].selected
+                                            if (
+                                                !child.children[
+                                                    child.children.length - 1
+                                                ].selected
+                                            ) {
+                                                hideColumnsCount++;
+                                            }
+
+                                            for (
+                                                let i4 = 0;
+                                                i4 < child.children.length - 1;
+                                                i4++
+                                            ) {
+                                                const ch = child.children[i4];
+                                                if (ch.type == "input") {
+                                                    request[reverse][
+                                                        option.value
+                                                    ][i3]["name"] = ch.valueRU;
+                                                } else if (ch.type == "color") {
+                                                    request[reverse][
+                                                        option.value
+                                                    ][i3]["color"] = ch.valueRU.split('#')[1];
+                                                } else if (
+                                                    ch.type == "checkbox"
                                                 ) {
-                                                    hideColumnsCount++;
+                                                    request[reverse][
+                                                        option.value
+                                                    ][i3][ch.value] =
+                                                        ch.selected;
                                                 }
                                             }
                                         }
@@ -291,10 +302,9 @@ export default {
                                                 ] = child.selected;
                                             } else if (child.type == "parent") {
                                                 const ch = child.children[0];
-                                                console.log('ch.valueRU', ch.valueRU);
                                                 request[reverse][option.value][
                                                     child.value
-                                                ] = ch.valueRU;
+                                                ] = element.name == 'smi' || element.name == 'soc' ? ch.valueRU.split('#')[1] : ch.valueRU;
                                             }
                                         }
                                     } else if (
@@ -306,11 +316,6 @@ export default {
                                             i3++
                                         ) {
                                             const child = option.children[i3];
-                                            console.log(
-                                                i3 + " step:",
-                                                child.value,
-                                                child.selected
-                                            );
                                             if (child.selected) {
                                                 request[reverse][option.value] =
                                                     child.value;
@@ -333,11 +338,10 @@ export default {
                                                     const ch =
                                                         child.children[i4];
                                                     if (ch.selected) {
-                                                console.log('ch.valueRU', ch.valueRU);
                                                         request[reverse][
                                                             option.value
                                                         ][child.value] =
-                                                            ch.valueRU;
+                                                            ch.value;
                                                     }
                                                 }
                                             } else {
@@ -415,6 +419,12 @@ export default {
                                     } else if (option.type == "select") {
                                         request[reverse][option.value] =
                                             option.selected;
+                                    } else if (option.value != 'columns' && option.value != 'list_rows') {
+                                        let output = option.value == 'text_length'
+                                                ? option.children[0].valueRU
+                                                : option.valueRU,
+                                            number = parseInt(output);
+                                        request[reverse][option.value] = number;
                                     }
                                 }
                             }
@@ -442,13 +452,30 @@ export default {
                                             ) {
                                                 const child =
                                                     option.children[i3];
-                                                request[reverse][option.value] =
-                                                    child.value;
+                                                if (child.valueRU) {
+                                                    if (
+                                                        typeof child.valueRU ==
+                                                        "number"
+                                                    ) {
+                                                        request[reverse][
+                                                            option.value
+                                                        ] = parseInt(
+                                                            child.valueRU
+                                                        );
+                                                    } else {
+                                                        request[reverse][
+                                                            option.value
+                                                        ] = child.valueRU;
+                                                    }
+                                                } else {
+                                                    request[reverse][
+                                                        option.value
+                                                    ] = child.value;
+                                                }
                                             }
                                         }
                                     }
                                 } else if (option.children != undefined) {
-                                    console.log('option.children[0].valueRU', option.children[0].valueRU);
                                     request[reverse][option.value] =
                                         option.children[0].valueRU;
                                 }
@@ -468,10 +495,13 @@ export default {
                 "-" +
                 padTo2Digits(date.getMinutes());
 
-            let formatYmd = (date) => date.toISOString().slice(0, 10);
-            let fileName = `Export_iMAS_${formatYmd(
-                new Date()
-            )}_${hoursAndMinutes}.pdf`;
+            let formatYmd = (date) => date.toISOString().slice(0, 10),
+                fileName = `Export_iMAS_${formatYmd(
+                    new Date()
+                )}_${hoursAndMinutes}`,
+                fileNamepdf = `${fileName}.pdf`,
+                fileNamexlsx = `${fileName}.xlsx`,
+                fileNamedocx = `${fileName}.docx`;
 
             var params = {};
 
@@ -479,7 +509,6 @@ export default {
                 let tmp_params = window.location.href
                     .replace(/.*\?/, "")
                     .split("&");
-                console.log(tmp_params);
                 for (var p = 0; p < tmp_params.length; p++) {
                     var _tmp = tmp_params[p].split("=");
 
@@ -487,14 +516,15 @@ export default {
                 }
             }
 
-            console.log(params);
-            // console.log(arrayKey);
-            // console.log(arrayValue);
-
+            let formatFile = this.additional.format.file;
             request.push({
                 id: "template_settings",
+                orientation: this.additional.orientation,
+                font_size: 10,
+                full_page_title: true,
                 position: "0",
-                title: "projectName",
+                merge_cells: this.additional.merge_cells,
+                title: projectName,
                 user_id: 1555,
                 an_id: 10500,
                 location: params.location,
@@ -519,7 +549,7 @@ export default {
             // request.push({
             //     id: "template_settings",
             //     position: "0",
-            //     title: "projectName",
+            //     title: projectName,
             //     user_id:                    params.user_id,
             //     an_id:                      params.an_id,
             //     location:                   params.location,
@@ -553,17 +583,30 @@ export default {
                 url: "https://export.imas.kz/constructor", // https://export.imas.kz/test
                 responseType: "arraybuffer",
                 data: request,
-                // onDownloadProgress: function () {
-                //     this.loadingSpinner();
-                // },
             }).then(function (response) {
-                if (response.headers["content-type"] == "application/pdf") {
+                if (formatFile == "pdf") {
                     let blob = new Blob([response.data], {
-                        type: "application/pdf",
+                        type: response.headers["content-type"],
                     });
                     let link = document.createElement("a");
                     link.href = window.URL.createObjectURL(blob);
-                    link.download = fileName; //Export_iMAS_2022-12-20_15-36.pdf
+                    link.download = fileNamepdf; //Export_iMAS_2022-12-20_15-36.pdf
+                    link.click();
+                } else if (formatFile == "excel") {
+                    let blob = new Blob([response.data], {
+                        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    });
+                    let link = document.createElement("a");
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = fileNamexlsx; //Export_iMAS_2022-12-20_15-36.pdf
+                    link.click();
+                } else if (formatFile == "word") {
+                    let blob = new Blob([response.data], {
+                        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    });
+                    let link = document.createElement("a");
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = fileNamedocx; //Export_iMAS_2022-12-20_15-36.pdf
                     link.click();
                 } else if (response.headers["content-type"] == "text/plain") {
                     let blob = new Blob([response.data], {
@@ -574,25 +617,13 @@ export default {
                     link.download = `Report - ${response.headers["last-modified"]}.txt`;
                     link.click();
                 }
-                console.log(response.status === 200);
                 if (response.status === 200) {
-                    // this.loadingSpinner();
-                    console.log(
-                        ev.target.tagName == "BUTTON",
-                        ev.target.tagName,
-                        "BUTTON"
-                    );
                     if (ev.target.tagName == "BUTTON") {
-                        console.log(ev.target.removeAttribute("disabled"));
                         ev.target.click();
                     } else if (ev.target.tagName == "SPAN") {
-                        console.log(
-                            ev.target.parentElement.removeAttribute("disabled")
-                        );
                         ev.target.parentElement.click();
                     }
                 }
-                console.log(response.status);
             });
         },
         async ungroup(elements, groupElements, i) {

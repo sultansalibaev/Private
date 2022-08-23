@@ -12,7 +12,8 @@
                 </div>
             </div>
         </div>
-        <div class="block">
+        <div class="block hide" v-if="additional.format.file == 'word'"></div>
+        <div class="block" v-else>
             <div class="block__header">Графики</div>
             <div v-for="element in elements" :key="element.id">
                 <div
@@ -25,7 +26,8 @@
             </div>
             <div class="element" @click="createGroup">Группа</div>
         </div>
-        <div class="block">
+        <div class="block hide" v-if="additional.format.file == 'excel' || additional.format.file == 'word'"></div>
+        <div class="block" v-else>
             <div class="block__header">Карты</div>
             <div v-for="element in elements" :key="element.id">
                 <div
@@ -56,6 +58,10 @@
 export default {
     name: "Menu",
     props: {
+		additional: {
+			type: Object,
+			required: true,
+		},
         elements: {
             type: Array,
             required: true,
@@ -66,21 +72,7 @@ export default {
         },
     },
     methods: {
-        // createElement(ev) {
-        //     for (let i = 0; i < this.elements.length; i++) {
-        //         const el = this.elements[i];
-        // 		console.log(el.id, ev.target.getAttribute("id"), el.id == ev.target.getAttribute("id"));
-        //         if (el.id == ev.target.getAttribute("id")) {
-        //             this.newElements.push(el);
-        //         }
-        //     }
-        // },
         createElement(ev, element) {
-            // console.log(element);
-            // for (let i = 0; i < this.newElements.length; i++) {
-            //     const element = this.newElements[i];
-            //     console.log(element, ev.target);
-            // }
             ev.target.style.background = "#ccc";
             if (this.newElements.length) {
                 for (let i = 0; i < this.newElements.length; i++) {
@@ -91,32 +83,39 @@ export default {
                 }
             }
             const independentCopy = JSON.parse(JSON.stringify(element));
-            // independentCopy.id = Date.now();
             this.newElements.push(independentCopy);
         },
         createGroup(ev) {
             if (this.newElements.length >= 1) {
                 let groupCount = 0;
+                let hasGroups = false;
                 for (let i = 0; i < this.newElements.length; i++) {
                     const element = this.newElements[i];
 
                     if (element.group) {
                         groupCount++;
                     }
+                    if (element.groups == "groups") {
+                        hasGroups = true;
+                    }
                 }
-                if (groupCount < 2) {
-                    return this.newElements.push({
-                        id: Date.now(),
-                        name: "Group",
-                        group: [],
-                    });
-                } else if (groupCount == 2) {
-                    ev.target.style.background = "#ccc";
-                    return this.newElements.push({
-                        id: Date.now(),
-                        name: "Group",
-                        group: [],
-                    });
+                if (hasGroups) {
+                    if (groupCount < 2) {
+                        return this.newElements.push({
+                            id: Date.now(),
+                            name: "Group",
+                            group: [],
+                            description: "Элементы, занимающие половину ширины страницы, можно расположить рядом. Перенесите 2 элемента в группу, и в отчете они будут расположены в две колонки, занимая меньше места на странице.",
+                        });
+                    } else if (groupCount == 2) {
+                        ev.target.style.background = "#ccc";
+                        return this.newElements.push({
+                            id: Date.now(),
+                            name: "Group",
+                            group: [],
+                            description: "Элементы, занимающие половину ширины страницы, можно расположить рядом. Перенесите 2 элемента в группу, и в отчете они будут расположены в две колонки, занимая меньше места на странице.",
+                        });
+                    }
                 }
             }
         },

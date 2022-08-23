@@ -3,13 +3,13 @@
         <div class="wrap centre">
             <div class="checkbox">
                 <input
-                    id="check"
+                    :id="index"
                     type="checkbox"
-                    name="check"
-                    value="check"
-					v-model="additional.full_text"
+                    :name="index"
+                    :value="index"
+					v-model="additional[val]"
                 />
-                <label for="check"><slot></slot></label>
+                <label :for="index"><slot></slot></label>
             </div>
         </div>
     </div>
@@ -23,8 +23,16 @@ export default {
 			type: String,
 			required: true,
 		},
+		val: {
+			type: String,
+			required: true,
+		},
 		additional: {
 			type: Object,
+			required: true,
+		},
+		index: {
+			type: String,
 			required: true,
 		},
 	},
