@@ -5,7 +5,9 @@
                 class="fa-solid fa-grip-lines handle"
                 :style="'background:' + elementColor"
             ></i>
-            <span :style="'background:' + elementColor" :title="description">{{ element }}</span>
+            <span :style="'background:' + elementColor" :title="description">{{
+                element
+            }}</span>
             <i
                 @click="dropDown"
                 class="fa-solid fa-angle-right"
@@ -51,12 +53,16 @@ export default {
             });
         },
         dropDown(ev) {
-            let elements = document.querySelectorAll('.element-list .element');
-            elements.forEach(element => {
-                element.parentElement.style.height = "40px";
-            });
-            console.log(ev.target);
             let nextEl = ev.target.nextElementSibling;
+            let elements = document.querySelectorAll(".element-list .element");
+            elements.forEach((element) => {
+                if (nextEl.parentElement != element) {
+                    element.parentElement.style.height = "";
+                } else {
+                    element.parentElement.style.height = "";
+                }
+            });
+            console.log(nextEl);
             if (nextEl.style.display == "none") {
                 this.hideOther(nextEl);
                 nextEl.classList.remove("hidden");

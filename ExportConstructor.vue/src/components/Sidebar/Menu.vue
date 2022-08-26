@@ -24,9 +24,19 @@
                     {{ element.nameRU }}
                 </div>
             </div>
-            <div class="element" @click="createGroup">Группа</div>
+            <div
+                class="block hide"
+                v-if="additional.format.file == 'excel'"
+            ></div>
+            <div class="element" @click="createGroup" v-else>Группа</div>
         </div>
-        <div class="block hide" v-if="additional.format.file == 'excel' || additional.format.file == 'word'"></div>
+        <div
+            class="block hide"
+            v-if="
+                additional.format.file == 'excel' ||
+                additional.format.file == 'word'
+            "
+        ></div>
         <div class="block" v-else>
             <div class="block__header">Карты</div>
             <div v-for="element in elements" :key="element.id">
@@ -58,10 +68,10 @@
 export default {
     name: "Menu",
     props: {
-		additional: {
-			type: Object,
-			required: true,
-		},
+        additional: {
+            type: Object,
+            required: true,
+        },
         elements: {
             type: Array,
             required: true,
@@ -105,7 +115,8 @@ export default {
                             id: Date.now(),
                             name: "Group",
                             group: [],
-                            description: "Элементы, занимающие половину ширины страницы, можно расположить рядом. Перенесите 2 элемента в группу, и в отчете они будут расположены в две колонки, занимая меньше места на странице.",
+                            description:
+                                "Элементы, занимающие половину ширины страницы, можно расположить рядом. Перенесите 2 элемента в группу, и в отчете они будут расположены в две колонки, занимая меньше места на странице.",
                         });
                     } else if (groupCount == 2) {
                         ev.target.style.background = "#ccc";
@@ -113,7 +124,8 @@ export default {
                             id: Date.now(),
                             name: "Group",
                             group: [],
-                            description: "Элементы, занимающие половину ширины страницы, можно расположить рядом. Перенесите 2 элемента в группу, и в отчете они будут расположены в две колонки, занимая меньше места на странице.",
+                            description:
+                                "Элементы, занимающие половину ширины страницы, можно расположить рядом. Перенесите 2 элемента в группу, и в отчете они будут расположены в две колонки, занимая меньше места на странице.",
                         });
                     }
                 }

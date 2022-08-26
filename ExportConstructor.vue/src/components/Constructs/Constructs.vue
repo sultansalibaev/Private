@@ -5,7 +5,7 @@
                 <input
                     type="text"
                     class="project-name"
-                    placeholder="Название Шаблона..."
+                    placeholder="Имя проекта..."
                 /><!-- Мой Шаблон -->
                 <!-- <button class="icon"><i class="fa fa-search"></i></button> -->
             </div>
@@ -13,7 +13,7 @@
                 <input
                     type="text"
                     class="project-name2"
-                    placeholder="Имя проекта..."
+                    placeholder="Название Шаблона..."
                 /><!-- Мой Шаблон -->
                 <!-- <button class="icon"><i class="fa fa-search"></i></button> -->
             </div>
@@ -35,7 +35,16 @@
                     >Объединить ячейки</checkbox
                 >
             </div>
-            <div v-if="additional.format.file == 'word'" :style="additional.menu ? '' : 'display:none'">
+            <div :style="'width:' + checkbox3Width && (!additional.menu ? '' : ';display:none')" v-if="additional.format.file == 'word'">
+                <checkbox
+                    :checkboxWidth="checkbox3Width"
+                    :additional="additional"
+                    :val="'full_page_title'"
+                    :index="'check2'"
+                    >Титульник</checkbox
+                >
+            </div>
+            <div v-if="!additional.format.file == 'word'" :style="additional.menu ? '' : 'display:none'">
                 <div
                     style="position: relative"
                     :style="'width:' + selectOrientationArray[0].selectWidth"
@@ -49,7 +58,7 @@
                     ></vue-select>
                 </div>
             </div>
-            <div :style="additional.menu ? '' : 'display:none'">
+            <div :style="additional.format.file == 'pdf' && additional.menu ? '' : 'display:none'">
                 <div
                     style="position: relative"
                     :style="'width:' + selectLanguageArray[0].selectWidth"
@@ -63,7 +72,7 @@
                     ></vue-select>
                 </div>
             </div>
-            <div>
+            <div :style="additional.menu ? '' : 'display:none'">
                 <div
                     style="position: relative"
                     :style="'width:' + selectArray[0].selectWidth"
@@ -72,6 +81,7 @@
                         :elements="elements"
                         :selectArray="selectArray[0]"
                         :additional="additional"
+                        :oldElements="oldElements"
                     ></vue-select>
                 </div>
             </div>
@@ -94,8 +104,9 @@
                 :elements="elements"
                 :model="model"
                 :loading="loading"
+                :bluring="bluring"
             ></construct>
-            <div class="model hide">
+            <div class="model hide" style="z-index:30;">
                 <div class="model__title">Заголовок:</div>
                 <div class="container-4" style="margin-right: 10px">
                     <input
@@ -107,6 +118,19 @@
                     <!-- <button class="icon"><i class="fa fa-search"></i></button> -->
                 </div>
                 <button class="model-btn" @click="saveInput">Сохранить</button>
+            </div>
+            <div class="model-bg" v-if="bluring.is || error.is" style="position: absolute;z-index:30;left: 0;right: 0;top: 0;bottom: 0;background: #000;opacity: .4;"></div>
+            <div class="model model-error"  :class="error.is?'':' hide'" style="z-index:30;padding:0;margin: -40px 100px 0 100px;background: #fff;flex-direction:column;align-items: flex-start;border-radius: 5px;overflow: hidden;">
+                <div class="model__title" style="display: flex;padding: 20px;">
+                    <i class="fa-solid fa-triangle-exclamation" style="font-size:30px;color:red;margin-right: 15px;"></i>
+                    <div style="display:flex;flex-direction: column;">
+                        <span style="font-size:20px;font-weight:600"></span>
+                        <span style="font-size:14px;margin-top:10px"></span>
+                    </div>
+                </div>
+                <div class="btn-bg" style="display: flex;justify-content: flex-end;align-self: stretch;padding: 8px;background-color: #F9FAFB;">
+                    <button class="model-btn" @click="hideErrorModel" style="color:#374150;background:#fff;border: 1px solid #D6D9DE;">Закрыть</button>
+                </div>
             </div>
         </div>
     </div>
@@ -123,6 +147,14 @@ export default {
             type: Object,
             required: false,
         },
+        bluring: {
+            type: Object,
+            required: false,
+        },
+        error: {
+            type: Object,
+            required: false,
+        },
         elementLanguageList: {
             type: Array,
             required: true,
@@ -131,12 +163,16 @@ export default {
             type: Array,
             required: true,
         },
+        oldElements: {
+            type: Array,
+            required: true,
+        },
         additional: {
             type: Object,
             required: true,
         },
         loading: {
-            type: Boolean,
+            type: Object,
             required: true,
         },
     },
@@ -145,6 +181,7 @@ export default {
             model: { is: false },
             checkboxWidth: "180px",
             checkbox2Width: "240px",
+            checkbox3Width: "150px",
             selectMenuArray: [
                 {
                     selectName: "Menu",
@@ -154,15 +191,15 @@ export default {
                         {
                             id: 1,
                             iconClass: "",
-                            name: "Шаблон",
-                            checked: "checked",
+                            name: "Проект",
+                            checked: "",
                             disabled: "",
                         },
                         {
                             id: 2,
                             iconClass: "",
-                            name: "Проект",
-                            checked: "",
+                            name: "Шаблон",
+                            checked: "checked",
                             disabled: "",
                         },
                     ],
@@ -200,7 +237,7 @@ export default {
                             iconClass: "far fa-file-powerpoint",
                             name: "PowerPoint",
                             checked: "",
-                            disabled: "",
+                            disabled: "disabled",
                         },
                     ],
                 },
@@ -262,6 +299,11 @@ export default {
     },
     emits: ["update"],
     methods: {
+        hideErrorModel() {
+            document.querySelector('.model-error').classList.add('hide');
+            this.bluring.is = false;
+            this.error.is = false;
+        },
         saveInput() {
             console.log('btn event');
             let id = document.querySelector('.model-btn').getAttribute("id"),

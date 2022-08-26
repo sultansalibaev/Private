@@ -3,6 +3,7 @@
         <div class="col-xs-12 export p-t-15">
             <button
                 class="button btn btn-imas btn-sm f-l"
+                id="post-btn"
                 @click="postSettings"
             >
                 <span>Скачать</span></button
@@ -34,16 +35,28 @@ export default {
             required: true,
         },
         loading: {
-            type: Boolean,
+            type: Object,
+            required: true,
+        },
+        error: {
+            type: Object,
             required: true,
         },
     },
-    emits: ["update", "loadingSpinner"],
+    emits: ["update"],
     methods: {
         async loadingSpinner() {
-            this.$emit("loadingSpinner");
+            if (this.loading.is == false) {
+                this.loading.is = true;
+            } else {
+                this.loading.is = false;
+            }
+            console.log("this.loading.is", this.loading.is);
         },
         async postSettings(ev) {
+            // if (this.elements) {
+
+            // }
             let groups = document.querySelectorAll(".Group");
 
             let errCount = 0;
@@ -73,7 +86,12 @@ export default {
 
             this.loadingSpinner();
 
-            if (this.loading == true) {
+            console.log(ev.target, ev.target.classList.contains("hasError"));
+
+            if (ev.target.classList.contains("hasError")) {
+                this.error.is = true;
+            }
+            if (this.loading.is == false) {
                 return;
             }
             ev.target.setAttribute("disabled", true);
@@ -195,8 +213,44 @@ export default {
                                             request[reverse][option.value] =
                                                 option.selected;
                                         } else if (option.type == "select") {
-                                            request[reverse][option.value] =
-                                                option.selected;
+                                            if (option.value == "type") {
+                                                for (
+                                                    let i3 = 0;
+                                                    i3 < option.children.length;
+                                                    i3++
+                                                ) {
+                                                    const child =
+                                                        option.children[i3];
+                                                    if (child.selected) {
+                                                        request[reverse][
+                                                            option.value
+                                                        ] = child.value;
+                                                        for (
+                                                            let i4 = 0;
+                                                            i4 <
+                                                            child.children
+                                                                .length;
+                                                            i4++
+                                                        ) {
+                                                            const ch =
+                                                                child.children[
+                                                                    i4
+                                                                ];
+                                                            if (ch.selected) {
+                                                                request[
+                                                                    reverse
+                                                                ][ch.value] =
+                                                                    ch.selected;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            } else if (
+                                                option.children == undefined
+                                            ) {
+                                                request[reverse][option.value] =
+                                                    option.selected;
+                                            }
                                         }
                                     } else if (option.children != undefined) {
                                         request[reverse][option.value] =
@@ -223,16 +277,19 @@ export default {
                                 ) {
                                     let option = element.options[i2],
                                         tableSelected = true;
-                                    if (element.options[0].value == 'table') {
-                                        tableSelected = element.options[0].selected;
+                                    if (element.options[0].value == "table") {
+                                        tableSelected =
+                                            element.options[0].selected;
                                     }
 
                                     if (option.value == "title") {
                                         request[reverse][option.value] =
                                             option.children[0].valueRU;
                                     } else if (
-                                        option.value == "columns" && tableSelected ||
-                                        option.value == "list_rows" && !tableSelected
+                                        (option.value == "columns" &&
+                                            tableSelected) ||
+                                        (option.value == "list_rows" &&
+                                            !tableSelected)
                                     ) {
                                         request[reverse][option.value] = [];
                                         let hideColumnsCount = 0;
@@ -275,7 +332,10 @@ export default {
                                                 } else if (ch.type == "color") {
                                                     request[reverse][
                                                         option.value
-                                                    ][i3]["color"] = ch.valueRU.split('#')[1];
+                                                    ][i3]["color"] =
+                                                        ch.valueRU.split(
+                                                            "#"
+                                                        )[1];
                                                 } else if (
                                                     ch.type == "checkbox"
                                                 ) {
@@ -304,7 +364,13 @@ export default {
                                                 const ch = child.children[0];
                                                 request[reverse][option.value][
                                                     child.value
-                                                ] = element.name == 'smi' || element.name == 'soc' ? ch.valueRU.split('#')[1] : ch.valueRU;
+                                                ] =
+                                                    element.name == "smi" ||
+                                                    element.name == "soc"
+                                                        ? ch.valueRU.split(
+                                                              "#"
+                                                          )[1]
+                                                        : ch.valueRU;
                                             }
                                         }
                                     } else if (
@@ -419,12 +485,42 @@ export default {
                                     } else if (option.type == "select") {
                                         request[reverse][option.value] =
                                             option.selected;
-                                    } else if (option.value != 'columns' && option.value != 'list_rows') {
-                                        let output = option.value == 'text_length'
-                                                ? option.children[0].valueRU
-                                                : option.valueRU,
-                                            number = parseInt(output);
-                                        request[reverse][option.value] = number;
+                                    } else if (
+                                        option.value != "columns" &&
+                                        option.value != "list_rows"
+                                    ) {
+                                        if (option.type == "hide") {
+                                            console.log(
+                                                'option.type != "hide"'
+                                            );
+                                            let output = option.children[0]
+                                                .value
+                                                ? option.children[0].value
+                                                : option.children[0].valueRU;
+                                            let number = 0;
+                                            if (option.value == "font_name") {
+                                                output = option.children[0]
+                                                    .valueRU
+                                                    ? option.children[0].valueRU
+                                                    : option.children[0].value;
+                                                number = output;
+                                            } else {
+                                                output = option.children[0]
+                                                    .valueRU
+                                                    ? option.children[0].valueRU
+                                                    : option.children[0].value;
+                                                number = parseInt(output);
+                                            }
+                                            request[reverse][option.value] =
+                                                number;
+                                            // } else if (option.value == "text_length") {
+                                            //     console.log('option.value == "text_length"');
+                                            //     let output = option.children[0].valueRU
+                                            //                 ? option.children[0].valueRU
+                                            //                 : option.children[0].value,
+                                            //         number = parseInt(output);
+                                            //     request[reverse][option.value] = number;
+                                        }
                                     }
                                 }
                             }
@@ -441,7 +537,37 @@ export default {
                                         request[reverse][option.value] =
                                             option.selected;
                                     } else if (option.type == "select") {
-                                        if (option.children == undefined) {
+                                        if (option.value == "type") {
+                                            for (
+                                                let i3 = 0;
+                                                i3 < option.children.length;
+                                                i3++
+                                            ) {
+                                                const child =
+                                                    option.children[i3];
+                                                if (child.selected) {
+                                                    request[reverse][
+                                                        option.value
+                                                    ] = child.value;
+                                                    for (
+                                                        let i4 = 0;
+                                                        i4 <
+                                                        child.children.length;
+                                                        i4++
+                                                    ) {
+                                                        const ch =
+                                                            child.children[i4];
+                                                        if (ch.selected) {
+                                                            request[reverse][
+                                                                ch.value
+                                                            ] = ch.selected;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        } else if (
+                                            option.children == undefined
+                                        ) {
                                             request[reverse][option.value] =
                                                 option.selected;
                                         } else {
@@ -521,12 +647,13 @@ export default {
                 id: "template_settings",
                 orientation: this.additional.orientation,
                 font_size: 10,
-                full_page_title: true,
+                font_name: 'Arial',
+                full_page_title: this.additional.full_page_title,
                 position: "0",
                 merge_cells: this.additional.merge_cells,
                 title: projectName,
-                user_id: 1555,
-                an_id: 10500,
+                user_id: params.user_id,
+                an_id: params.an_id,
                 location: params.location,
                 s_date: params.s_date,
                 f_date: params.f_date,
@@ -544,7 +671,7 @@ export default {
                 message_type: params.message_type,
                 place: params.place,
                 place_id: params.place_id,
-                token: "QogkKiPCBgck",
+                token: params.token,
             });
             // request.push({
             //     id: "template_settings",
@@ -583,48 +710,59 @@ export default {
                 url: "https://export.imas.kz/constructor", // https://export.imas.kz/test
                 responseType: "arraybuffer",
                 data: request,
-            }).then(function (response) {
-                if (formatFile == "pdf") {
-                    let blob = new Blob([response.data], {
-                        type: response.headers["content-type"],
-                    });
-                    let link = document.createElement("a");
-                    link.href = window.URL.createObjectURL(blob);
-                    link.download = fileNamepdf; //Export_iMAS_2022-12-20_15-36.pdf
-                    link.click();
-                } else if (formatFile == "excel") {
-                    let blob = new Blob([response.data], {
-                        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    });
-                    let link = document.createElement("a");
-                    link.href = window.URL.createObjectURL(blob);
-                    link.download = fileNamexlsx; //Export_iMAS_2022-12-20_15-36.pdf
-                    link.click();
-                } else if (formatFile == "word") {
-                    let blob = new Blob([response.data], {
-                        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    });
-                    let link = document.createElement("a");
-                    link.href = window.URL.createObjectURL(blob);
-                    link.download = fileNamedocx; //Export_iMAS_2022-12-20_15-36.pdf
-                    link.click();
-                } else if (response.headers["content-type"] == "text/plain") {
-                    let blob = new Blob([response.data], {
-                        type: "text/plain",
-                    });
-                    let link = document.createElement("a");
-                    link.href = window.URL.createObjectURL(blob);
-                    link.download = `Report - ${response.headers["last-modified"]}.txt`;
-                    link.click();
-                }
-                if (response.status === 200) {
-                    if (ev.target.tagName == "BUTTON") {
-                        ev.target.click();
-                    } else if (ev.target.tagName == "SPAN") {
-                        ev.target.parentElement.click();
+            })
+                .then(function (response) {
+                    if (formatFile == "pdf") {
+                        let blob = new Blob([response.data], {
+                            type: response.headers["content-type"],
+                        });
+                        let link = document.createElement("a");
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = fileNamepdf; //Export_iMAS_2022-12-20_15-36.pdf
+                        link.click();
+                    } else if (formatFile == "excel") {
+                        let blob = new Blob([response.data], {
+                            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        });
+                        let link = document.createElement("a");
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = fileNamexlsx; //Export_iMAS_2022-12-20_15-36.pdf
+                        link.click();
+                    } else if (formatFile == "word") {
+                        let blob = new Blob([response.data], {
+                            type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        });
+                        let link = document.createElement("a");
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = fileNamedocx; //Export_iMAS_2022-12-20_15-36.pdf
+                        link.click();
+                    } else if (
+                        response.headers["content-type"] == "text/plain"
+                    ) {
+                        let blob = new Blob([response.data], {
+                            type: "text/plain",
+                        });
+                        let link = document.createElement("a");
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = `Report - ${response.headers["last-modified"]}.txt`;
+                        link.click();
                     }
-                }
-            });
+                    console.log("tagName", ev.target.tagName);
+                    ev.target.parentElement.click();
+                })
+                .catch(function (res) {
+                    console.log(res, res.response.status);
+                    if (res.response.status !== 200) {
+                        ev.target.parentElement.classList.add("hasError");
+                        let errMessages = document.querySelectorAll(
+                            ".model-error .model__title div span"
+                        );
+                        errMessages[0].innerHTML = `Error: ${res.response.status}`;
+                        errMessages[1].innerHTML = res.message;
+                    }
+                    console.log("tagName", ev.target.tagName);
+                    ev.target.parentElement.click();
+                });
         },
         async ungroup(elements, groupElements, i) {
             let arr = elements,
@@ -658,5 +796,16 @@ export default {
 <style scoped>
 .btn {
     width: 100%;
+}
+#post-btn {
+    padding: 0;
+    display: flex;
+}
+#post-btn span {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 </style>

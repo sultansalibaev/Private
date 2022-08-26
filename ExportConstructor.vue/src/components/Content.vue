@@ -3,14 +3,17 @@
         :elements="elements"
         :elementLanguageList="switchCase()"
         :loading="loading"
+        :bluring="bluring"
+        :error="error"
         :defaultPDFValues="defaultPDFValues"
         :additional="additional"
+        :oldElements="oldElements"
     />
     <Sidebar
         :elements="switchCase()"
-        @loadingSpinner="loadingSpinner"
         :newElements="elements"
         :loading="loading"
+        :error="error"
         :additional="additional"
     />
 </template>
@@ -28,6 +31,8 @@ export default {
     },
     data() {
         return {
+            error: { is: false },
+            bluring: { is: false },
             defaultPDFValues: {
                 count: {
                     title: {
@@ -192,9 +197,28 @@ export default {
                 },
                 full_text: false,
                 merge_cells: true,
-                orientation: 'landscape',
+                orientation: "landscape",
+                full_page_title: true,
                 menu: true,
             },
+            oldElements: [
+                {
+                    format: 'word',
+                    elements: [],
+                },
+                {
+                    format: 'pdf',
+                    elements: [],
+                },
+                {
+                    format: 'excel',
+                    elements: [],
+                },
+                {
+                    format: 'powerpoint',
+                    elements: [],
+                },
+            ],
             wordElementList: [
                 {
                     type: "default",
@@ -847,8 +871,8 @@ export default {
                                         {
                                             id: "id-3_332",
                                             type: "color",
-                                            value: '#000000',
-                                            valueRU: '#000000',
+                                            value: "#000000",
+                                            valueRU: "#000000",
                                             color_picker: true,
                                         },
                                         {
@@ -1047,8 +1071,8 @@ export default {
                                         {
                                             id: "id-3_372",
                                             type: "color",
-                                            value: '#000000',
-                                            valueRU: '#000000',
+                                            value: "#000000",
+                                            valueRU: "#000000",
                                             color_picker: true,
                                         },
                                         {
@@ -1795,8 +1819,8 @@ export default {
                                         {
                                             id: "id-4_332",
                                             type: "color",
-                                            value: '#00f26c',
-                                            valueRU: '#00f26c',
+                                            value: "#00f26c",
+                                            valueRU: "#00f26c",
                                             color_picker: true,
                                         },
                                         {
@@ -1995,8 +2019,8 @@ export default {
                                         {
                                             id: "id-4_372",
                                             type: "color",
-                                            value: '#00f26c',
-                                            valueRU: '#00f26c',
+                                            value: "#00f26c",
+                                            valueRU: "#00f26c",
                                             color_picker: true,
                                         },
                                         {
@@ -3252,7 +3276,7 @@ export default {
             ],
             pdfElementList: [
                 {
-                    description: 'Ключевые слова проекта',
+                    description: "Ключевые слова проекта",
                     type: "default",
                     color: "#16395c",
                     id: "id-1",
@@ -3261,7 +3285,8 @@ export default {
                     nameRU: "Теги",
                     options: [
                         {
-                            description: "'0' - вывод полного списка тегов (по умолчанию).\nЧисловое значение задает количество ключевых слов в блоке.",
+                            description:
+                                "'0' - вывод полного списка тегов (по умолчанию).\nЧисловое значение задает количество ключевых слов в блоке.",
                             id: "id-1_1",
                             value: "length",
                             valueRU: "Длина",
@@ -3279,7 +3304,7 @@ export default {
                     ],
                 },
                 {
-                    description: 'Периода сбора информации',
+                    description: "Периода сбора информации",
                     type: "default",
                     color: "#16395c",
                     id: "id-2",
@@ -3288,7 +3313,7 @@ export default {
                     nameRU: "Период",
                     options: [
                         {
-                            description: 'Выбрать формат вывода даты',
+                            description: "Выбрать формат вывода даты",
                             id: "id-2_1",
                             value: "format", // YYYY-MM-DD HH:MM
                             valueRU: "Формат",
@@ -3315,7 +3340,8 @@ export default {
                     ],
                 },
                 {
-                    description: "Вывод блока содержащий:\n        'Общее количество сообщений'\n        'Количество нейтральных сообщений'\n        'Количество позитивных сообщений'\n        'Количество негативных сообшений'",
+                    description:
+                        "Вывод блока содержащий:\n        'Общее количество сообщений'\n        'Количество нейтральных сообщений'\n        'Количество позитивных сообщений'\n        'Количество негативных сообшений'",
                     type: "default",
                     color: "#16395c",
                     id: "id-3",
@@ -3340,7 +3366,8 @@ export default {
                     ],
                 },
                 {
-                    description: 'Вывод графика распределения публикаций по времени сбора информации.',
+                    description:
+                        "Вывод графика распределения публикаций по времени сбора информации.",
                     type: "default",
                     color: "#16395c",
                     id: "id-4",
@@ -3365,7 +3392,8 @@ export default {
                     ],
                 },
                 {
-                    description: 'Вывод графика распределения публикаций по тональности.',
+                    description:
+                        "Вывод графика распределения публикаций по тональности.",
                     type: "grouped",
                     color: "#075e07",
                     id: "id-5",
@@ -3388,16 +3416,94 @@ export default {
                             ],
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            description: "Выбрать формат вывода даты",
                             id: "id-5_2",
+                            value: "type", // YYYY-MM-DD HH:MM
+                            valueRU: "Тип",
+                            type: "select",
+                            position: "center",
+                            parentElement: true,
+                            children: [
+                                {
+                                    id: "id-5_21",
+                                    value: "pie",
+                                    valueRU: "Пирог",
+                                    type: "select",
+                                    selected: true,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_211",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    id: "id-5_22",
+                                    value: "bar",
+                                    valueRU: "Бар",
+                                    type: "select",
+                                    selected: false,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_221",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                        {
+                                            id: "id-5_222",
+                                            value: "labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    id: "id-5_23",
+                                    value: "column",
+                                    valueRU: "Столбец",
+                                    type: "select",
+                                    selected: false,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_221",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                        {
+                                            id: "id-5_222",
+                                            value: "labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            description:
+                                "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            id: "id-5_3",
                             value: "number", // YYYY-MM-DD HH:MM
                             valueRU: "Число",
                             type: "checkbox",
                             selected: true,
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'процентном' представлении.",
-                            id: "id-5_3",
+                            description:
+                                "Вывод в описании количества публикаций в 'процентном' представлении.",
+                            id: "id-5_4",
                             value: "percent", // YYYY-MM-DD HH:MM
                             valueRU: "Процент",
                             type: "checkbox",
@@ -3406,7 +3512,8 @@ export default {
                     ],
                 },
                 {
-                    description: "Вывод графика распределения публикаций по СМИ/Социальным сетям.",
+                    description:
+                        "Вывод графика распределения публикаций по СМИ/Социальным сетям.",
                     type: "grouped",
                     color: "#075e07",
                     id: "id-6",
@@ -3429,16 +3536,94 @@ export default {
                             ],
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            description: "Выбрать формат вывода даты",
                             id: "id-6_2",
+                            value: "type", // YYYY-MM-DD HH:MM
+                            valueRU: "Тип",
+                            type: "select",
+                            position: "center",
+                            parentElement: true,
+                            children: [
+                                {
+                                    id: "id-6_21",
+                                    value: "pie",
+                                    valueRU: "Пирог",
+                                    type: "select",
+                                    selected: true,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_211",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    id: "id-6_22",
+                                    value: "bar",
+                                    valueRU: "Бар",
+                                    type: "select",
+                                    selected: false,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_221",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                        {
+                                            id: "id-5_222",
+                                            value: "labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    id: "id-6_23",
+                                    value: "column",
+                                    valueRU: "Столбец",
+                                    type: "select",
+                                    selected: false,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_221",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                        {
+                                            id: "id-5_222",
+                                            value: "labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            description:
+                                "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            id: "id-6_3",
                             value: "number", // YYYY-MM-DD HH:MM
                             valueRU: "Число",
                             type: "checkbox",
                             selected: true,
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'процентном' представлении.",
-                            id: "id-6_3",
+                            description:
+                                "Вывод в описании количества публикаций в 'процентном' представлении.",
+                            id: "id-6_4",
                             value: "percent", // YYYY-MM-DD HH:MM
                             valueRU: "Процент",
                             type: "checkbox",
@@ -3447,7 +3632,8 @@ export default {
                     ],
                 },
                 {
-                    description: "Вывод графика распределения публикаций по категориям СМИ.",
+                    description:
+                        "Вывод графика распределения публикаций по категориям СМИ.",
                     type: "grouped",
                     color: "#075e07",
                     id: "id-7",
@@ -3478,22 +3664,101 @@ export default {
                                 {
                                     id: "id-7_12",
                                     type: "input",
-                                    value: 225,
-                                    valueRU: 225,
+                                    value: 10,
+                                    valueRU: 10,
                                 },
                             ],
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            description: "Выбрать формат вывода даты",
                             id: "id-7_3",
+                            value: "type", // YYYY-MM-DD HH:MM
+                            valueRU: "Тип",
+                            type: "select",
+                            position: "center",
+                            parentElement: true,
+                            children: [
+                                {
+                                    id: "id-7_31",
+                                    value: "pie",
+                                    valueRU: "Пирог",
+                                    type: "select",
+                                    selected: true,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_211",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    id: "id-7_32",
+                                    value: "bar",
+                                    valueRU: "Бар",
+                                    type: "select",
+                                    selected: false,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_221",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                        {
+                                            id: "id-5_222",
+                                            value: "labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    id: "id-7_33",
+                                    value: "column",
+                                    valueRU: "Столбец",
+                                    type: "select",
+                                    selected: false,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_221",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                        {
+                                            id: "id-5_222",
+                                            value: "labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики",
+                                            type: "checkbox",
+                                            inGroup: false,
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            description:
+                                "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            id: "id-7_4",
                             value: "number", // YYYY-MM-DD HH:MM
                             valueRU: "Число",
                             type: "checkbox",
                             selected: true,
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'процентном' представлении.",
-                            id: "id-7_4",
+                            description:
+                                "Вывод в описании количества публикаций в 'процентном' представлении.",
+                            id: "id-7_5",
                             value: "percent", // YYYY-MM-DD HH:MM
                             valueRU: "Процент",
                             type: "checkbox",
@@ -3502,7 +3767,8 @@ export default {
                     ],
                 },
                 {
-                    description: "Вывод графика распределения публикаций по социальным сетям.",
+                    description:
+                        "Вывод графика распределения публикаций по социальным сетям.",
                     type: "grouped",
                     color: "#075e07",
                     id: "id-8",
@@ -3540,16 +3806,95 @@ export default {
                             ],
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            description: "Выбрать формат вывода даты",
                             id: "id-8_3",
+                            value: "type", // YYYY-MM-DD HH:MM
+                            valueRU: "Тип",
+                            type: "select",
+                            position: "center",
+                            parentElement: true,
+                            children: [
+                                {
+                                    id: "id-8_31",
+                                    value: "pie",
+                                    valueRU: "Пирог",
+                                    type: "select",
+                                    selected: true,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_211",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    id: "id-8_32",
+                                    value: "bar",
+                                    valueRU: "Бар",
+                                    type: "select",
+                                    selected: false,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_221",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                        {
+                                            id: "id-5_222",
+                                            value: "labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    id: "id-8_33",
+                                    value: "column",
+                                    valueRU: "Столбец",
+                                    type: "select",
+                                    selected: false,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_221",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                        {
+                                            id: "id-5_222",
+                                            value: "labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики",
+                                            type: "checkbox",
+                                            inGroup: false,
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            description:
+                                "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            id: "id-8_4",
                             value: "number", // YYYY-MM-DD HH:MM
                             valueRU: "Число",
                             type: "checkbox",
                             selected: true,
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'процентном' представлении.",
-                            id: "id-8_4",
+                            description:
+                                "Вывод в описании количества публикаций в 'процентном' представлении.",
+                            id: "id-8_5",
                             value: "percent", // YYYY-MM-DD HH:MM
                             valueRU: "Процент",
                             type: "checkbox",
@@ -3558,7 +3903,8 @@ export default {
                     ],
                 },
                 {
-                    description: "Вывод карты мира, отображающий распределения публикаций по странам.",
+                    description:
+                        "Вывод карты мира, отображающий распределения публикаций по странам.",
                     type: "grouped",
                     color: "#075e07",
                     id: "id-11",
@@ -3577,6 +3923,21 @@ export default {
                                     type: "input",
                                     value: "map",
                                     valueRU: "Карта",
+                                },
+                            ],
+                        },
+                        {
+                            id: "id-11_2",
+                            value: "length", // YYYY-MM-DD HH:MM
+                            valueRU: "Длина",
+                            parentElement: true,
+                            children: [
+                                {
+                                    id: "id-11_21",
+                                    value: 20,
+                                    valueRU: 20,
+                                    type: "input",
+                                    selected: true,
                                 },
                             ],
                         },
@@ -3601,16 +3962,87 @@ export default {
                         //     ],
                         // },
                         {
-                            description: "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            description: "Выбрать формат вывода даты",
                             id: "id-11_3",
+                            value: "type", // YYYY-MM-DD HH:MM
+                            valueRU: "Тип",
+                            type: "select",
+                            position: "center",
+                            parentElement: true,
+                            children: [
+                                {
+                                    id: "id-11_31",
+                                    value: "pie",
+                                    valueRU: "Пирог",
+                                    type: "select",
+                                    selected: false,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_211",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    id: "id-11_32",
+                                    value: "bar",
+                                    valueRU: "Бар",
+                                    type: "select",
+                                    selected: true,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_221",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                        {
+                                            id: "id-5_222",
+                                            value: "labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    id: "id-11_33",
+                                    value: "column",
+                                    valueRU: "Столбец",
+                                    type: "select",
+                                    selected: false,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_221",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            description:
+                                "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            id: "id-11_4",
                             value: "number", // YYYY-MM-DD HH:MM
                             valueRU: "Число",
                             type: "checkbox",
                             selected: true,
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'процентном' представлении.",
-                            id: "id-11_4",
+                            description:
+                                "Вывод в описании количества публикаций в 'процентном' представлении.",
+                            id: "id-11_5",
                             value: "percent", // YYYY-MM-DD HH:MM
                             valueRU: "Процент",
                             type: "checkbox",
@@ -3619,7 +4051,8 @@ export default {
                     ],
                 },
                 {
-                    description: "Вывод графика наиболее активных сообществ/пользователей социальных сетей.",
+                    description:
+                        "Вывод графика наиболее активных сообществ/пользователей социальных сетей.",
                     type: "grouped",
                     color: "#075e07",
                     id: "id-12",
@@ -3638,6 +4071,21 @@ export default {
                                     type: "input",
                                     value: "map",
                                     valueRU: "Карта",
+                                },
+                            ],
+                        },
+                        {
+                            id: "id-12_2",
+                            value: "length", // YYYY-MM-DD HH:MM
+                            valueRU: "Длина",
+                            parentElement: true,
+                            children: [
+                                {
+                                    id: "id-12_21",
+                                    value: 20,
+                                    valueRU: 20,
+                                    type: "input",
+                                    selected: true,
                                 },
                             ],
                         },
@@ -3662,16 +4110,87 @@ export default {
                         //     ],
                         // },
                         {
-                            description: "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            description: "Выбрать формат вывода даты",
                             id: "id-12_3",
+                            value: "type", // YYYY-MM-DD HH:MM
+                            valueRU: "Тип",
+                            type: "select",
+                            position: "center",
+                            parentElement: true,
+                            children: [
+                                {
+                                    id: "id-12_31",
+                                    value: "pie",
+                                    valueRU: "Пирог",
+                                    type: "select",
+                                    selected: false,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_211",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    id: "id-12_32",
+                                    value: "bar",
+                                    valueRU: "Бар",
+                                    type: "select",
+                                    selected: true,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_221",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                        {
+                                            id: "id-5_222",
+                                            value: "labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    id: "id-12_33",
+                                    value: "column",
+                                    valueRU: "Столбец",
+                                    type: "select",
+                                    selected: false,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_221",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            description:
+                                "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            id: "id-12_4",
                             value: "number", // YYYY-MM-DD HH:MM
                             valueRU: "Число",
                             type: "checkbox",
                             selected: true,
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'процентном' представлении.",
-                            id: "id-12_4",
+                            description:
+                                "Вывод в описании количества публикаций в 'процентном' представлении.",
+                            id: "id-12_5",
                             value: "percent", // YYYY-MM-DD HH:MM
                             valueRU: "Процент",
                             type: "checkbox",
@@ -3680,7 +4199,8 @@ export default {
                     ],
                 },
                 {
-                    description: "Вывод графика наиболее активных сообществ/пользователей самой популярной социальной сети в проекте.",
+                    description:
+                        "Вывод графика наиболее активных сообществ/пользователей самой популярной социальной сети в проекте.",
                     type: "grouped",
                     color: "#075e07",
                     id: "id-13",
@@ -3699,6 +4219,21 @@ export default {
                                     type: "input",
                                     value: "map",
                                     valueRU: "Карта",
+                                },
+                            ],
+                        },
+                        {
+                            id: "id-13_2",
+                            value: "length", // YYYY-MM-DD HH:MM
+                            valueRU: "Длина",
+                            parentElement: true,
+                            children: [
+                                {
+                                    id: "id-13_21",
+                                    value: 20,
+                                    valueRU: 20,
+                                    type: "input",
+                                    selected: true,
                                 },
                             ],
                         },
@@ -3723,16 +4258,87 @@ export default {
                         //     ],
                         // },
                         {
-                            description: "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            description: "Выбрать формат вывода даты",
                             id: "id-13_3",
+                            value: "type", // YYYY-MM-DD HH:MM
+                            valueRU: "Тип",
+                            type: "select",
+                            position: "center",
+                            parentElement: true,
+                            children: [
+                                {
+                                    id: "id-13_31",
+                                    value: "pie",
+                                    valueRU: "Пирог",
+                                    type: "select",
+                                    selected: false,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_211",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    id: "id-13_32",
+                                    value: "bar",
+                                    valueRU: "Бар",
+                                    type: "select",
+                                    selected: true,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_221",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                        {
+                                            id: "id-5_222",
+                                            value: "labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    id: "id-13_33",
+                                    value: "column",
+                                    valueRU: "Столбец",
+                                    type: "select",
+                                    selected: false,
+                                    parentElement: false,
+                                    children: [
+                                        {
+                                            id: "id-5_221",
+                                            value: "data_labels", // YYYY-MM-DD HH:MM
+                                            valueRU: "Метрики данных",
+                                            type: "checkbox",
+                                            selected: true,
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            description:
+                                "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            id: "id-13_4",
                             value: "number", // YYYY-MM-DD HH:MM
                             valueRU: "Число",
                             type: "checkbox",
                             selected: true,
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'процентном' представлении.",
-                            id: "id-13_4",
+                            description:
+                                "Вывод в описании количества публикаций в 'процентном' представлении.",
+                            id: "id-13_5",
                             value: "percent", // YYYY-MM-DD HH:MM
                             valueRU: "Процент",
                             type: "checkbox",
@@ -3741,7 +4347,8 @@ export default {
                     ],
                 },
                 {
-                    description: "Вывод карты мира, отображающий распределения публикаций по странам.",
+                    description:
+                        "Вывод карты мира, отображающий распределения публикаций по странам.",
                     type: "map",
                     color: "#696e12",
                     id: "id-9",
@@ -3764,7 +4371,8 @@ export default {
                             ],
                         },
                         {
-                            description: "'Количество регионов' - задает максимальное количество регионов, отображаемое по картой.",
+                            description:
+                                "'Количество регионов' - задает максимальное количество регионов, отображаемое по картой.",
                             id: "id-9_2",
                             value: "length", // YYYY-MM-DD HH:MM
                             valueRU: "Длина",
@@ -3781,7 +4389,8 @@ export default {
                             ],
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            description:
+                                "Вывод в описании количества публикаций в 'цифровом' представлении.",
                             id: "id-9_3",
                             value: "number", // YYYY-MM-DD HH:MM
                             valueRU: "Число",
@@ -3789,7 +4398,8 @@ export default {
                             selected: true,
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'процентном' представлении.",
+                            description:
+                                "Вывод в описании количества публикаций в 'процентном' представлении.",
                             id: "id-9_4",
                             value: "percent", // YYYY-MM-DD HH:MM
                             valueRU: "Процент",
@@ -3799,7 +4409,8 @@ export default {
                     ],
                 },
                 {
-                    description: "Вывод карты Республики Казахстан, отображающий распределение публикаций по областям.",
+                    description:
+                        "Вывод карты Республики Казахстан, отображающий распределение публикаций по областям.",
                     type: "map",
                     color: "#696e12",
                     id: "id-10",
@@ -3822,7 +4433,8 @@ export default {
                             ],
                         },
                         {
-                            description: "Количество областей' - задает максимальное количество областей, отображаемое по картой.",
+                            description:
+                                "Количество областей' - задает максимальное количество областей, отображаемое по картой.",
                             id: "id-10_2",
                             value: "length", // YYYY-MM-DD HH:MM
                             valueRU: "Длина",
@@ -3839,7 +4451,8 @@ export default {
                             ],
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'цифровом' представлении.",
+                            description:
+                                "Вывод в описании количества публикаций в 'цифровом' представлении.",
                             id: "id-10_3",
                             value: "number", // YYYY-MM-DD HH:MM
                             valueRU: "Число",
@@ -3847,7 +4460,8 @@ export default {
                             selected: true,
                         },
                         {
-                            description: "Вывод в описании количества публикаций в 'процентном' представлении.",
+                            description:
+                                "Вывод в описании количества публикаций в 'процентном' представлении.",
                             id: "id-10_4",
                             value: "percent", // YYYY-MM-DD HH:MM
                             valueRU: "Процент",
@@ -3882,7 +4496,8 @@ export default {
                             ],
                         },
                         {
-                            description: "'Элементы таблицы' - позволяет выбрать колонки, добавляемые в таблицу, а также их расположение.",
+                            description:
+                                "'Элементы таблицы' - позволяет выбрать колонки, добавляемые в таблицу, а также их расположение.",
                             id: "id-14_2",
                             value: "columns",
                             valueRU: "Столбцы",
@@ -3890,7 +4505,8 @@ export default {
                             parentElement: true,
                             children: [
                                 {
-                                    description: "Порядковый номер публикации в таблице. Элемент по умолчанию, добавляется автоматически первой колонкой.",
+                                    description:
+                                        "Порядковый номер публикации в таблице. Элемент по умолчанию, добавляется автоматически первой колонкой.",
                                     id: "id-14_21",
                                     value: "number",
                                     type: "hide",
@@ -3936,7 +4552,8 @@ export default {
                                     ],
                                 },
                                 {
-                                    description: "Часть текста публикации размером не более 400 символов.",
+                                    description:
+                                        "Часть текста публикации размером не более 400 символов.",
                                     id: "id-14_23",
                                     value: "content",
                                     type: "column",
@@ -3982,7 +4599,8 @@ export default {
                                     ],
                                 },
                                 {
-                                    description: "Категория источника публикации.",
+                                    description:
+                                        "Категория источника публикации.",
                                     id: "id-14_25",
                                     value: "category",
                                     type: "column",
@@ -4051,7 +4669,8 @@ export default {
                                     ],
                                 },
                                 {
-                                    description: "Тональность, определенная автоматизированной системой. Погрешность системы составляет от 10 до 30 процентов.",
+                                    description:
+                                        "Тональность, определенная автоматизированной системой. Погрешность системы составляет от 10 до 30 процентов.",
                                     id: "id-14_28",
                                     value: "sentiment",
                                     type: "column",
@@ -4076,7 +4695,8 @@ export default {
                             ],
                         },
                         {
-                            description: "Параметры для выбора выделения ключевого слова в колонке 'Краткое содержание'.",
+                            description:
+                                "Параметры для выбора выделения ключевого слова в колонке 'Краткое содержание'.",
                             id: "id-14_3",
                             value: "tag_highlight",
                             valueRU: "Выделение тега",
@@ -4133,7 +4753,8 @@ export default {
                             ],
                         },
                         {
-                            description: "Выбор формата вывода даты и времени публикации статьи в колонке 'Дата'.",
+                            description:
+                                "Выбор формата вывода даты и времени публикации статьи в колонке 'Дата'.",
                             id: "id-14_4",
                             value: "datetime_format",
                             valueRU: "Формат даты и времени",
@@ -4159,7 +4780,8 @@ export default {
                             ],
                         },
                         {
-                            description: "Выбор порядка сортировки публикаций в таблице.",
+                            description:
+                                "Выбор порядка сортировки публикаций в таблице.",
                             id: "id-14_5",
                             value: "order",
                             valueRU: "Порядок",
@@ -4193,7 +4815,8 @@ export default {
                                     ],
                                 },
                                 {
-                                    description: "Выбор очередности следования публикаций в зависимости от определенной тональности.",
+                                    description:
+                                        "Выбор очередности следования публикаций в зависимости от определенной тональности.",
                                     id: "id-14_52",
                                     value: "resource",
                                     valueRU: "Ресурсы",
@@ -4327,7 +4950,8 @@ export default {
                             ],
                         },
                         {
-                            description: "Позволяет выбрать колонки, добавляемые в таблицу, а также их расположение.",
+                            description:
+                                "Позволяет выбрать колонки, добавляемые в таблицу, а также их расположение.",
                             id: "id-15_2",
                             value: "columns",
                             valueRU: "Столбцы",
@@ -4335,7 +4959,8 @@ export default {
                             parentElement: true,
                             children: [
                                 {
-                                    description: "Порядковый номер публикации в таблице. Элемент по умолчанию, добавляется автоматически первой колонкой.",
+                                    description:
+                                        "Порядковый номер публикации в таблице. Элемент по умолчанию, добавляется автоматически первой колонкой.",
                                     id: "id-15_21",
                                     value: "number",
                                     type: "hide",
@@ -4358,7 +4983,8 @@ export default {
                                     ],
                                 },
                                 {
-                                    description: "Часть текста публикации размером не более 400 символов.",
+                                    description:
+                                        "Часть текста публикации размером не более 400 символов.",
                                     id: "id-15_23",
                                     value: "content",
                                     type: "column",
@@ -4404,7 +5030,8 @@ export default {
                                     ],
                                 },
                                 {
-                                    description: "Сообщество/Пользователь социальной сети.",
+                                    description:
+                                        "Сообщество/Пользователь социальной сети.",
                                     id: "id-15_26",
                                     value: "resource",
                                     type: "column",
@@ -4450,7 +5077,8 @@ export default {
                                     ],
                                 },
                                 {
-                                    description: "Тональность, определенная автоматизированной системой. Погрешность системы составляет от 10 до 30 процентов.",
+                                    description:
+                                        "Тональность, определенная автоматизированной системой. Погрешность системы составляет от 10 до 30 процентов.",
                                     id: "id-15_28",
                                     value: "sentiment",
                                     type: "column",
@@ -4475,7 +5103,8 @@ export default {
                             ],
                         },
                         {
-                            description: "Параметры для выбора выделения ключевого слова в колонке 'Краткое содержание'.",
+                            description:
+                                "Параметры для выбора выделения ключевого слова в колонке 'Краткое содержание'.",
                             id: "id-15_3",
                             value: "tag_highlight",
                             valueRU: "Выделение тега",
@@ -4532,7 +5161,8 @@ export default {
                             ],
                         },
                         {
-                            description: "Выбор формата вывода даты и времени публикации статьи в колонке 'Дата'.",
+                            description:
+                                "Выбор формата вывода даты и времени публикации статьи в колонке 'Дата'.",
                             id: "id-15_4",
                             value: "datetime_format",
                             valueRU: "Формат даты и времени",
@@ -4558,7 +5188,8 @@ export default {
                             ],
                         },
                         {
-                            description: "Выбор порядка сортировки публикаций в таблице.",
+                            description:
+                                "Выбор порядка сортировки публикаций в таблице.",
                             id: "id-15_5",
                             value: "order",
                             valueRU: "Порядок",
@@ -4626,7 +5257,8 @@ export default {
                                     ],
                                 },
                                 {
-                                    description: "Выбор очередности следования публикаций в зависимости от определенной тональности.",
+                                    description:
+                                        "Выбор очередности следования публикаций в зависимости от определенной тональности.",
                                     id: "id-15_53",
                                     value: "sentiments",
                                     valueRU: "Оценка",
@@ -4702,10 +5334,10 @@ export default {
                 },
             ],
             elements: [],
-            loading: false,
+            loading: { is: false },
         };
     },
-    emits: ["update", "loadingSpinner"],
+    emits: ["update"],
     methods: {
         switchCase() {
             switch (this.additional.format.file) {
@@ -4717,23 +5349,6 @@ export default {
                     return this.wordElementList;
                 default:
                     break;
-            }
-        },
-        loadingSpinner() {
-            try {
-                if (this.loading == false) {
-                    this.loading = true;
-                    return true;
-                } else {
-                    this.loading = false;
-                    return false;
-                }
-                // console.log('this.loading:', this.loading);
-            } catch (error) {
-                this.loading = false;
-                console.log("this.loading:");
-                console.log("this.loading:", this.loading);
-                console.log(error);
             }
         },
         deepClone(arr) {
@@ -4758,14 +5373,15 @@ export default {
                 let columns = element.options[1];
                 for (let i = 0; i < columns.children.length; i++) {
                     const column = columns.children[i];
-                    if (this.defaultPDFValues[element.name].columns[
-                            column.value
-                        ]) {
-
-                    column.valueRU = column.children[0].valueRU =
+                    if (
                         this.defaultPDFValues[element.name].columns[
                             column.value
-                        ][this.additional.format.language];
+                        ]
+                    ) {
+                        column.valueRU = column.children[0].valueRU =
+                            this.defaultPDFValues[element.name].columns[
+                                column.value
+                            ][this.additional.format.language];
                     }
                 }
             }

@@ -2,7 +2,7 @@
 	<div class="_sidebar">
 		<Menu :additional="additional" :newElements="newElements" :elements="elements"></Menu>
 		<!-- <Buttons :elements="elements"></Buttons> -->
-		<Buttons :additional="additional" :elements="newElements" @loadingSpinner="loadingSpinner" :loading="loading"></Buttons>
+		<Buttons :additional="additional" :elements="newElements" :loading="loading" :error="error"></Buttons>
 	</div>
 </template>
 
@@ -30,16 +30,15 @@ export default {
 			required: true,
 		},
         loading: {
-            type: Boolean,
+            type: Object,
+            required: true,
+        },
+        error: {
+            type: Object,
             required: true,
         },
 	},
-    emits: ["update", 'loadingSpinner'],
-	methods: {
-        loadingSpinner() {
-            this.$emit('loadingSpinner');
-        },
-	}
+    emits: ["update"],
 }
 </script>
 

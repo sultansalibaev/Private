@@ -9,19 +9,58 @@
     >
         <div v-if="option.type != 'parent'">
             <div v-for="child in children" :key="child" style="width: 100%">
-                <construct-button
-                    @click="updateOption(children, child)"
-                    class="element__ch select"
-                    :class="child.selected + ''"
-                    v-if="!child.parentElement && child.type == 'select'"
-                    :style="child.selected ? 'background:' + elementColor : ''"
-                    :id="child.id"
-                    :title="child.description || ''"
-                >
-                    {{
-                        child.valueRU == undefined ? child.value : child.valueRU
-                    }}
-                </construct-button>
+                <div v-if="!child.parentElement && child.type == 'select'" style="position:relative">
+                    <construct-button
+                        @click="updateOption(children, child)"
+                        class="element__parent element__ch dropdown select"
+                        :class="child.selected + ' parent'"
+                        :style="
+                            child.selected ? 'background:' + elementColor : ''
+                        "
+                        :id="child.id"
+                        :title="child.description || ''"
+                    >
+                        {{
+                            child.valueRU == undefined
+                                ? child.value
+                                : child.valueRU
+                        }}
+                    </construct-button>
+                    <div
+                        v-if="child.selected"
+                        style="
+                            position: absolute;
+                            width: 170%;
+                            left: 100%;
+                            top: 0px;
+                            flex-direction: column;
+                        "
+                        class="hideOtherChild"
+                    >
+                        <div v-for="ch in child.children" :key="ch.id">
+                            <construct-button
+                                @click="unchecked($event, ch)"
+                                class="element__ch checkbox"
+                                :class="ch.selected + ''"
+                                :id="ch.id"
+                                v-if="ch.type == 'checkbox' && !ch.inGroup"
+                                :style="
+                                    ch.selected
+                                        ? 'background:' + elementColor
+                                        : ''
+                                "
+                                :title="ch.description || ''"
+                                style="display: block"
+                            >
+                                {{
+                                    ch.valueRU != undefined
+                                        ? ch.valueRU
+                                        : ch.value
+                                }}
+                            </construct-button>
+                        </div>
+                    </div>
+                </div>
                 <div v-else-if="child.type == 'input'" style="width: 100%">
                     <input
                         v-model="child.valueRU"
@@ -201,7 +240,8 @@
                                     width: calc(100% - 4px);
                                 "
                                 :style="
-                                    !child.children[child.children.length - 1].selected
+                                    !child.children[child.children.length - 1]
+                                        .selected
                                         ? 'background:#ccc;pointer-events: none;'
                                         : 'background:' + elementColor
                                 "
@@ -215,7 +255,8 @@
                                 v-else-if="ch.type == 'color'"
                                 style="padding: 0"
                                 :style="
-                                    !child.children[child.children.length - 1].selected
+                                    !child.children[child.children.length - 1]
+                                        .selected
                                         ? 'background:#ccc;pointer-events: none;'
                                         : 'background:' + elementColor
                                 "
@@ -244,7 +285,8 @@
                                     ch.value != undefined
                                 "
                                 :style="
-                                    !child.children[child.children.length - 1].selected
+                                    !child.children[child.children.length - 1]
+                                        .selected
                                         ? 'background:#ccc;pointer-events: none;'
                                         : ch.selected
                                         ? 'background:' + elementColor
@@ -260,7 +302,10 @@
                             </construct-button>
                             <!-- Rounded switch -->
                             <div
-                                v-if="ch.value == undefined && child.value != 'content'"
+                                v-if="
+                                    ch.value == undefined &&
+                                    child.value != 'content'
+                                "
                                 @click="checkedInput"
                                 class="element__ch dropdown checkbox"
                                 :style="

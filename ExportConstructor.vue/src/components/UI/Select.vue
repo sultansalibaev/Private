@@ -102,24 +102,56 @@ export default {
             type: Array,
             required: false,
         },
+        oldElements: {
+            type: Array,
+            required: true,
+        },
         defaultPDFValues: {
             type: Object,
             required: false,
         },
     },
     methods: {
+        saveOldElements(oldFormat) {
+            let elementsLength = this.elements.length;
+            for (let index = 0; index < this.oldElements.length; index++) {
+                const item = this.oldElements[index];
+
+                if (item.format == oldFormat) {
+                    item.elements = [];
+                    item.elements.push(...this.elements);
+                    for (let index = 0; index < elementsLength; index++) {
+                        this.elements.splice(this.elements[index], 1);
+                    }
+                    let menuElements =
+                        document.querySelectorAll(".menu .element");
+                    menuElements.forEach((menuElement) => {
+                        menuElement.style.background = "#4678a6";
+                    });
+                    return;
+                }
+            }
+        },
+        recoverOldElements(newFormat) {
+            for (let index = 0; index < this.oldElements.length; index++) {
+                const item = this.oldElements[index];
+
+
+                if (item.format == newFormat) {
+                    console.log(item.format);
+                    console.log(item.elements, item.elements.length);
+                    if (item.elements.length != 0) {
+                        this.elements.push(...item.elements);
+                    }
+                    return;
+                }
+            }
+        },
         selectCheckedName: function (optionName) {
             if (this.selectArray.selectName == "Формат") {
+                this.saveOldElements(this.additional.format.file);
+                this.recoverOldElements(optionName.toLowerCase());
                 this.additional.format.file = optionName.toLowerCase();
-                let elementsLength = this.elements.length;
-                for (let index = 0; index < elementsLength; index++) {
-                    this.elements.splice(this.elements[index], 1);
-                }
-                let menuElements = document.querySelectorAll(".menu .element");
-                menuElements.forEach((menuElement) => {
-                    menuElement.style.background = "#4678a6";
-                });
-                console.log("this.elements", this.elements);
             } else if (this.selectArray.selectName == "Язык") {
                 this.additional.format.language = optionName.toLowerCase();
 
@@ -232,7 +264,6 @@ export default {
 
 #select-button {
     position: relative;
-    /* height: 16px; */
     padding: 12px 14px;
     background-color: #fff;
     border-radius: 4px;
@@ -326,12 +357,12 @@ export default {
     left: 14px;
     padding: 0;
     display: none;
-    font-size: 16px !important;
+    font-size: 20px !important;
 }
 
 #options-view-button:checked ~ #options .option i {
     display: block;
-    padding: 12px 0;
+    padding: 10px 0;
 }
 
 .label {
@@ -537,7 +568,20 @@ input[type="radio"] {
     display: block;
 }
 
-.option:hover .label {
+.option:nth-child(1) i {
+    color: #0583f3;
+}
+.option:nth-child(2) i {
+    color: #d80000;
+}
+.option:nth-child(3) i {
+    color: #00ad0f;
+}
+.option:nth-child(4) i {
+    color: #ebeb0e;
+}
+.option:hover .label,
+.option:hover i {
     color: #fff;
 }
 

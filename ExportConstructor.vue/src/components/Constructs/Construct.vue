@@ -1,5 +1,8 @@
 <template>
-    <div class="element-list" :class="loading ? 'bluring' : ''">
+    <div
+        class="element-list"
+        :class="loading.is || bluring.is ? 'bluring' : ''"
+    >
         <vuedraggable
             group="todosapp"
             :list="elements"
@@ -15,7 +18,9 @@
                     :elementColor="element.color"
                     v-if="element.name != 'Group'"
                     :class="element.groups"
-                    :description="element.description ? element.description : ''"
+                    :description="
+                        element.description ? element.description : ''
+                    "
                 >
                     <next-element
                         @update="updateOption"
@@ -32,7 +37,14 @@
                 </construct-element>
                 <div class="new-list" v-else>
                     <div class="group-header">
-                        <div class="group-header__title handle" :title="element.description ? element.description : ''">Группа</div>
+                        <div
+                            class="group-header__title handle"
+                            :title="
+                                element.description ? element.description : ''
+                            "
+                        >
+                            Группа
+                        </div>
                         <div
                             class="group-header__ungroup"
                             :id="element.id"
@@ -46,6 +58,7 @@
                         group="todosapp"
                         :list="element.group"
                         :class="element.name"
+                        @dragleave="dragLeave"
                         animation="250"
                         style="padding: 18px 0"
                     >
@@ -58,7 +71,9 @@
                                 :element="group.nameRU"
                                 :elementColor="group.color"
                                 v-if="group"
-                                :description="group.description ? group.description : ''"
+                                :description="
+                                    group.description ? group.description : ''
+                                "
                             >
                                 <next-element
                                     @update="updateOption"
@@ -81,8 +96,8 @@
         </vuedraggable>
         <!-- <div v-for="element in elements" :key="element" class="new-list"></div> -->
     </div>
-    <div v-if="loading">
-        <div class="lds-roller">
+    <div v-if="loading.is">
+        <div class="lds-roller" style="z-index: 30">
             <div></div>
             <div></div>
             <div></div>
@@ -106,7 +121,11 @@ export default {
             required: true,
         },
         loading: {
-            type: Boolean,
+            type: Object,
+            required: true,
+        },
+        bluring: {
+            type: Object,
             required: true,
         },
         model: {
@@ -116,27 +135,83 @@ export default {
     },
     emits: ["update"],
     methods: {
+        dragLeave(ev) {
+            if (
+                ev.target.classList.contains("Group") &&
+                !ev.relatedTarget.classList.contains("hr") &&
+                !ev.relatedTarget.classList.contains("element")
+            ) {
+                console.log("!!!Элемент покинул группу!!!");
+                for (let i = 0; i < [200, 400, 600, 800, 1000].length; i++) {
+                    const element = [200, 400, 600, 800, 1000][i];
+                    setTimeout(() => {
+                        for (
+                            let index = 0;
+                            index < this.elements.length;
+                            index++
+                        ) {
+                            let element = this.elements[index];
+                            if (
+                                element.name == "smi_distribution" ||
+                                element.name == "soc_distribution"
+                            ) {
+                                element.options[2].children[2].children[1].inGroup = false;
+                            }
+                        }
+                    }, element);
+                }
+            }
+        },
+        inGroup() {
+            for (let index = 0; index < this.elements.length; index++) {
+                let element = this.elements[index];
+                if (element.name == "Group") {
+                    for (let index = 0; index < element.group.length; index++) {
+                        let groupEl = element.group[index];
+
+                        if (
+                            groupEl.name == "smi_distribution" ||
+                            groupEl.name == "soc_distribution"
+                        ) {
+                            groupEl.options[2].children[2].children[1].inGroup = true;
+                        }
+                    }
+                }
+            }
+            return true;
+        },
         checkMove(evt) {
-            console.log(evt.to, evt);
+            // console.log(evt.to, evt);
+            // console.log(evt);
             if (!evt.to.classList.contains("Group")) {
+                // if (evt.related.classList.contains('new-list')) {
+                //     console.log('!!!Элемент не попал в группу!!!');
+                // }
                 return true;
             } else if (
                 evt.to.classList.contains("Group") &&
                 evt.dragged.firstChild.classList.contains("groups") &&
                 evt.to.children.length < 2
             ) {
+                console.log("Элемент попал в группу");
                 let group = evt.to;
                 if (group.children.length == 1) {
                     group.parentElement.classList.remove("groupErr");
                     group.nextElementSibling.style.display = "none";
                 }
-                console.log(
-                    "My evt " +
-                        evt.dragged.firstChild.classList.contains("groups"),
-                    evt,
-                    evt.dragged,
-                    evt.to
-                );
+                // console.log(
+                //     "My evt " +
+                //         evt.dragged.firstChild.classList.contains("groups"),
+                //     evt,
+                //     evt.dragged,
+                //     evt.to
+                // );
+                for (let i = 0; i < [200, 400, 600, 800, 1000].length; i++) {
+                    const element = [200, 400, 600, 800, 1000][i];
+                    setTimeout(() => {
+                        this.inGroup();
+                    }, element);
+                }
                 return true;
             } else {
                 return false;
