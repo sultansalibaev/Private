@@ -9,7 +9,10 @@
     >
         <div v-if="option.type != 'parent'">
             <div v-for="child in children" :key="child" style="width: 100%">
-                <div v-if="!child.parentElement && child.type == 'select'" style="position:relative">
+                <div
+                    v-if="!child.parentElement && child.type == 'select'"
+                    style="position: relative"
+                >
                     <construct-button
                         @click="updateOption(children, child)"
                         class="element__parent element__ch dropdown select"
@@ -202,10 +205,10 @@
                     <construct-button
                         class="element__parent element__ch dropdown"
                         :class="child.type"
-                        @click="dropDown"
+                        @click="dropDown($event, child, child.selected)"
                         :id="child.id"
                         :style="
-                            !child.children[child.children.length - 1].selected
+                            !child.selected
                                 ? 'background:#ccc'
                                 : 'background:' + elementColor
                         "
@@ -227,36 +230,14 @@
                         "
                     >
                         <div v-for="ch in child.children" :key="ch.id">
-                            <input
-                                v-model="ch.valueRU"
-                                class="child__input"
-                                v-if="ch.type == 'input'"
-                                style="
-                                    display: flex;
-                                    margin-bottom: 2px;
-                                    padding-left: 6px;
-                                    border: none;
-                                    color: white;
-                                    width: calc(100% - 4px);
-                                "
-                                :style="
-                                    !child.children[child.children.length - 1]
-                                        .selected
-                                        ? 'background:#ccc;pointer-events: none;'
-                                        : 'background:' + elementColor
-                                "
-                                type="text"
-                                :id="ch.id"
-                            />
                             <div
                                 class="element__ch dropdown"
                                 :class="ch.type"
                                 :id="ch.id"
-                                v-else-if="ch.type == 'color'"
+                                v-if="ch.type == 'color'"
                                 style="padding: 0"
                                 :style="
-                                    !child.children[child.children.length - 1]
-                                        .selected
+                                    !child.selected
                                         ? 'background:#ccc;pointer-events: none;'
                                         : 'background:' + elementColor
                                 "
@@ -285,8 +266,7 @@
                                     ch.value != undefined
                                 "
                                 :style="
-                                    !child.children[child.children.length - 1]
-                                        .selected
+                                    !child.selected
                                         ? 'background:#ccc;pointer-events: none;'
                                         : ch.selected
                                         ? 'background:' + elementColor
@@ -300,34 +280,6 @@
                                         : ch.value
                                 }}
                             </construct-button>
-                            <!-- Rounded switch -->
-                            <div
-                                v-if="
-                                    ch.value == undefined &&
-                                    child.value != 'content'
-                                "
-                                @click="checkedInput"
-                                class="element__ch dropdown checkbox"
-                                :style="
-                                    !ch.selected
-                                        ? 'background:#ccc'
-                                        : 'background:' + elementColor
-                                "
-                                style="min-height: 16px; width: 100%"
-                            >
-                                <label
-                                    class="switch"
-                                    :id="ch.id"
-                                    :class="ch.type"
-                                    @click="sliderRound"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        v-model="ch.selected"
-                                    />
-                                    <span class="slider round"></span>
-                                </label>
-                            </div>
                             <!-- Отображать -->
                         </div>
                     </div>
@@ -335,7 +287,13 @@
             </div>
         </vuedraggable>
 
-        <div v-if="option.value == 'order'">
+
+        <vuedraggable
+            style="
+                flex-direction: column;
+            "
+            :list="children"
+            animation="150">
             <div v-for="child in children" :key="child">
                 <div
                     v-if="
@@ -346,10 +304,13 @@
                 >
                     <construct-button
                         class="element__parent element__ch dropdown"
-                        :style="'background:' + elementColor"
+                        :style="
+                            !child.selected
+                                ? 'background:#ccc'
+                                : 'background:' + elementColor"
                         :class="child.type"
                         :id="child.id"
-                        @click="dropDown"
+                        @click="dropDown($event, child, child.selected)"
                     >
                         {{ child.valueRU }}
                     </construct-button>
@@ -358,29 +319,34 @@
                         style="
                             flex-direction: column;
                             position: absolute;
-                            width: 100%;
                             left: 100%;
                             top: 0px;
                         "
                         :list="child.children"
                         animation="150"
                         class="hideOtherChild"
+                        v-if="child.selected"
                     >
                         <div v-for="ch in child.children" :key="ch">
                             <construct-button
+                                @click="unchecked($event, ch)"
                                 class="element__ch dropdown"
-                                :class="ch.type"
+                                :class="ch.type + ' ' + ch.selected"
                                 :id="ch.id"
-                                style="padding: 0"
-                                :style="'background:' + elementColor"
+                                style="padding: 6px"
+                                :style="
+                                    ch.selected
+                                        ? 'background:' + elementColor
+                                        : 'background:#ccc'
+                                "
                             >
-                                {{ ch.value }}
+                                {{ ch.valueRU }}
                             </construct-button>
                         </div>
                     </vuedraggable>
                 </div>
             </div>
-        </div>
+        </vuedraggable>
     </div>
 </template>
 
@@ -407,6 +373,11 @@ export default {
             required: true,
         },
     },
+    data() {
+        return {
+            timeoutId: 0,
+        };
+    },
     emits: ["update"],
     methods: {
         inputColor(ev, child) {
@@ -425,7 +396,11 @@ export default {
         },
         hideOther(el) {
             document.querySelectorAll(".hideOtherChild").forEach((element) => {
-                if (el != element) {
+                if (el == 'selected') {
+                    element.style.display = "none";
+                    element.classList.add("hidden");
+                }
+                else if (el != element) {
                     element.style.display = "none";
                     element.classList.add("hidden");
                 }
@@ -438,18 +413,33 @@ export default {
             console.log(ev.target, checkedInput);
         },
         unchecked(ev, child) {
-            if (child.type == "checkbox") {
-                if (child.selected == true) {
-                    ev.target.style.background = "#ccc";
-                    return (child.selected = false);
-                } else if (child.selected == false) {
-                    console.log(child);
-                    ev.target.style.background = this.elementColor; // "#3b82ec"
-                    return (child.selected = true);
-                }
+            // if (child.type == "checkbox" && ) {
+            if (child.selected == true) {
+                ev.target.style.background = "#ccc";
+                return (child.selected = false);
+            } else if (child.selected == false) {
+                console.log(child);
+                ev.target.style.background = this.elementColor; // "#3b82ec"
+                return (child.selected = true);
+            }
+            // }
+        },
+        myLog(selected) {
+            this.timeoutId++;
+            if (this.timeoutId == 1) {
+                setTimeout(() => {
+                    this.timeoutId = 0;
+                }, 200);
+            } else {
+                return selected == null ? null : !selected;
             }
         },
-        dropDown(ev) {
+        dropDown(ev, child = null, selected = null) {
+            if (child != null && selected != null && child?.value != 'content') {
+                if (this.myLog(selected) != null)
+                    child.selected = this.myLog(selected);
+                if (!child.selected) return this.hideOther('selected');
+            }
             if (ev.target.classList.contains("element__parent")) {
                 let dropDown = ev.target.nextElementSibling;
                 if (dropDown.style.display == "flex") {

@@ -7,6 +7,7 @@
             group="todosapp"
             :list="elements"
             :move="checkMove"
+            @drag="drag"
             handle=".handle"
             animation="250"
             style="min-height: 80.2vh"
@@ -135,34 +136,28 @@ export default {
     },
     emits: ["update"],
     methods: {
-        dragLeave(ev) {
-            if (
-                ev.target.classList.contains("Group") &&
-                !ev.relatedTarget.classList.contains("hr") &&
-                !ev.relatedTarget.classList.contains("element")
-            ) {
-                console.log("!!!Элемент покинул группу!!!");
-                for (let i = 0; i < [200, 400, 600, 800, 1000].length; i++) {
-                    const element = [200, 400, 600, 800, 1000][i];
-                    setTimeout(() => {
-                        for (
-                            let index = 0;
-                            index < this.elements.length;
-                            index++
-                        ) {
-                            let element = this.elements[index];
-                            if (
-                                element.name == "smi_distribution" ||
-                                element.name == "soc_distribution"
-                            ) {
-                                element.options[2].children[2].children[1].inGroup = false;
-                            }
-                        }
-                    }, element);
+        checkDistributions(bool) {
+            let timeouts = [200, 400, 600, 800, 1000];
+
+            timeouts.forEach(timeout => {
+                setTimeout(() => {
+                    this.setDistributions();
+                }, timeout);
+            });
+
+            return bool;
+        },
+        setDistributions() {
+            for (let index = 0; index < this.elements.length; index++) {
+                let element = this.elements[index];
+                if (
+                    element.name == "smi_distribution" ||
+                    element.name == "soc_distribution"
+                ) {
+                    element.options[2].children[2].children[1].inGroup = false;
                 }
             }
-        },
-        inGroup() {
+
             for (let index = 0; index < this.elements.length; index++) {
                 let element = this.elements[index];
                 if (element.name == "Group") {
@@ -178,15 +173,19 @@ export default {
                     }
                 }
             }
-            return true;
+        },
+        dragLeave(ev) {
+            if (
+                ev.target.classList.contains("Group") &&
+                !ev.relatedTarget.classList.contains("hr") &&
+                !ev.relatedTarget.classList.contains("element")
+            ) {
+                console.log("!!!Элемент покинул группу!!!");
+                return this.checkDistributions(true);
+            }
         },
         checkMove(evt) {
-            // console.log(evt.to, evt);
-            // console.log(evt);
             if (!evt.to.classList.contains("Group")) {
-                // if (evt.related.classList.contains('new-list')) {
-                //     console.log('!!!Элемент не попал в группу!!!');
-                // }
                 return true;
             } else if (
                 evt.to.classList.contains("Group") &&
@@ -199,20 +198,7 @@ export default {
                     group.parentElement.classList.remove("groupErr");
                     group.nextElementSibling.style.display = "none";
                 }
-                // console.log(
-                //     "My evt " +
-                //         evt.dragged.firstChild.classList.contains("groups"),
-                //     evt,
-                //     evt.dragged,
-                //     evt.to
-                // );
-                for (let i = 0; i < [200, 400, 600, 800, 1000].length; i++) {
-                    const element = [200, 400, 600, 800, 1000][i];
-                    setTimeout(() => {
-                        this.inGroup();
-                    }, element);
-                }
-                return true;
+                return this.checkDistributions(true);
             } else {
                 return false;
             }

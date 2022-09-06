@@ -12,7 +12,7 @@
             <div class="container-4" :style="additional.menu ? '' : 'display:none'">
                 <input
                     type="text"
-                    class="project-name2"
+                    class="constructor-name"
                     placeholder="Название Шаблона..."
                 /><!-- Мой Шаблон -->
                 <!-- <button class="icon"><i class="fa fa-search"></i></button> -->
@@ -44,27 +44,13 @@
                     >Титульник</checkbox
                 >
             </div>
-            <div v-if="!additional.format.file == 'word'" :style="additional.menu ? '' : 'display:none'">
+            <div v-if="additional.format.file == 'word'" :style="!additional.menu ? '' : 'display:none'">
                 <div
                     style="position: relative"
                     :style="'width:' + selectOrientationArray[0].selectWidth"
                 >
                     <vue-select
                         :selectArray="selectOrientationArray[0]"
-                        :elementLanguageList="elementLanguageList"
-                        :defaultPDFValues="defaultPDFValues"
-                        :elements="elements"
-                        :additional="additional"
-                    ></vue-select>
-                </div>
-            </div>
-            <div :style="additional.format.file == 'pdf' && additional.menu ? '' : 'display:none'">
-                <div
-                    style="position: relative"
-                    :style="'width:' + selectLanguageArray[0].selectWidth"
-                >
-                    <vue-select
-                        :selectArray="selectLanguageArray[0]"
                         :elementLanguageList="elementLanguageList"
                         :defaultPDFValues="defaultPDFValues"
                         :elements="elements"
@@ -237,7 +223,7 @@ export default {
                             iconClass: "far fa-file-powerpoint",
                             name: "PowerPoint",
                             checked: "",
-                            disabled: "disabled",
+                            disabled: "",
                         },
                     ],
                 },
@@ -260,36 +246,6 @@ export default {
                             iconClass: "",
                             name: "Пейзаж",
                             checked: "checked",
-                            disabled: "",
-                        },
-                    ],
-                },
-            ],
-            selectLanguageArray: [
-                {
-                    selectName: "Язык",
-                    selectWidth: "80px",
-                    selectOptionValue: 80 - (25 % +"px"),
-                    options: [
-                        {
-                            id: 1,
-                            iconClass: "",
-                            name: "RUS",
-                            checked: "checked",
-                            disabled: "",
-                        },
-                        {
-                            id: 2,
-                            iconClass: "",
-                            name: "ENG",
-                            checked: "",
-                            disabled: "",
-                        },
-                        {
-                            id: 3,
-                            iconClass: "",
-                            name: "KAZ",
-                            checked: "",
                             disabled: "",
                         },
                     ],
@@ -363,7 +319,7 @@ export default {
     white-space: nowrap;
 }
 .container-4 input.project-name,
-.container-4 input.project-name2 {
+.container-4 input.constructor-name {
     width: 100%;
     height: 42px;
     background: #4678a6;
@@ -378,7 +334,7 @@ export default {
     border-radius: 5px;
 }
 .container-4 input.project-name::placeholder,
-.container-4 input.project-name2::placeholder {
+.container-4 input.constructor-name::placeholder {
     color: #fff;
 }
 .bg {

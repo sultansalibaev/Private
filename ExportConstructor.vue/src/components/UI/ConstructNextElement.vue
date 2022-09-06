@@ -240,10 +240,11 @@ export default {
             let offsetBottom =
                 eventTarget.parentElement.offsetHeight -
                 (eventTarget.offsetTop + eventTarget.offsetHeight + 3);
-            console.log("childChild", eventTarget, offsetBottom);
-            let dropDownOffsetHeight =
-                eventTarget.firstChild.children[1].firstChild.children.length *
-                22;
+            let eventTargetLength = 1;
+            if (!eventTarget.parentElement.classList.contains('next-element')) {
+                eventTargetLength = eventTarget.firstChild.children[1].firstChild.children.length;
+            }
+            let dropDownOffsetHeight = eventTargetLength * 22;
             if (offsetBottom < dropDownOffsetHeight && bool) {
                 eventTarget.parentElement.parentElement.parentElement.style.height = `${
                     eventTarget.parentElement.offsetHeight +
@@ -371,13 +372,13 @@ export default {
                         }
                         if (
                             parent.offsetHeight < 38 ||
-                            child.offsetHeight * childLength + 38 >
+                            child.offsetHeight * (childLength - 1) + 38 >
                                 parent.offsetHeight
                         ) {
                             console.log('log down');
                             parent.style.height = `${
                                 child.offsetHeight *
-                                    (child.children.length + multiplus) +
+                                    (child.children.length + multiplus - 1) +
                                 38
                             }px`;
                         }

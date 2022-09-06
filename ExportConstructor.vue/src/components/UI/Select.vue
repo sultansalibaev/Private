@@ -1,7 +1,10 @@
 <template>
-    <form id="app-cover" :style="'width:' + selectArray.selectWidth">
+    <form
+        id="app-cover"
+        :style="'width:' + selectArray.selectWidth"
+    >
         <div id="select-box">
-            <input type="checkbox" id="options-view-button" />
+            <input type="checkbox" id="options-view-button" class="options-view-button" />
             <div id="select-button" class="brd">
                 <div id="selected-value">
                     <span>{{ selectArray.selectName }}</span>
@@ -21,6 +24,7 @@
                             ? 'color:#2d3667;background: #ccc;pointer-events:none'
                             : ''
                     "
+                    @click="selectHoverOut"
                 >
                     <input
                         class="s-c top"
@@ -94,17 +98,13 @@ export default {
             type: Object,
             required: true,
         },
-        elementLanguageList: {
-            type: Array,
-            required: false,
-        },
         elements: {
             type: Array,
             required: false,
         },
         oldElements: {
             type: Array,
-            required: true,
+            required: false,
         },
         defaultPDFValues: {
             type: Object,
@@ -112,6 +112,12 @@ export default {
         },
     },
     methods: {
+        selectHoverOut() {
+            let optionViewBtn = document.querySelectorAll('.options-view-button');
+            optionViewBtn.forEach(el => {
+                el.checked = false;
+            });
+        },
         saveOldElements(oldFormat) {
             let elementsLength = this.elements.length;
             for (let index = 0; index < this.oldElements.length; index++) {
@@ -136,7 +142,6 @@ export default {
             for (let index = 0; index < this.oldElements.length; index++) {
                 const item = this.oldElements[index];
 
-
                 if (item.format == newFormat) {
                     console.log(item.format);
                     console.log(item.elements, item.elements.length);
@@ -152,81 +157,6 @@ export default {
                 this.saveOldElements(this.additional.format.file);
                 this.recoverOldElements(optionName.toLowerCase());
                 this.additional.format.file = optionName.toLowerCase();
-            } else if (this.selectArray.selectName == "Язык") {
-                this.additional.format.language = optionName.toLowerCase();
-
-                for (
-                    let index = 0;
-                    index < this.elementLanguageList.length;
-                    index++
-                ) {
-                    const element = this.elementLanguageList[index];
-                    if (element.options[0].value == "title") {
-                        element.options[0].children[0].valueRU =
-                            this.defaultPDFValues[element.name].title[
-                                this.additional.format.language
-                            ];
-
-                        if (element.type == "table") {
-                            let columns = element.options[1];
-                            for (let i = 0; i < columns.children.length; i++) {
-                                const column = columns.children[i];
-                                if (
-                                    this.defaultPDFValues[element.name].columns[
-                                        column.value
-                                    ]
-                                ) {
-                                    column.valueRU =
-                                        column.children[0].valueRU =
-                                            this.defaultPDFValues[
-                                                element.name
-                                            ].columns[column.value][
-                                                this.additional.format.language
-                                            ];
-                                }
-                            }
-                        }
-                    }
-                }
-                for (let index = 0; index < this.elements.length; index++) {
-                    const element = this.elements[index];
-                    if (element.options[0].value == "title") {
-                        element.options[0].children[0].valueRU =
-                            this.defaultPDFValues[element.name].title[
-                                this.additional.format.language
-                            ];
-                        if (element.type == "table") {
-                            let columns = element.options[1];
-                            for (let i = 0; i < columns.children.length; i++) {
-                                const column = columns.children[i];
-                                if (
-                                    this.defaultPDFValues[element.name].columns[
-                                        column.value
-                                    ]
-                                ) {
-                                    column.valueRU =
-                                        column.children[0].valueRU =
-                                            this.defaultPDFValues[
-                                                element.name
-                                            ].columns[column.value][
-                                                this.additional.format.language
-                                            ];
-                                }
-                            }
-                        }
-                        let modelIndex = document
-                            .querySelector(".model-btn")
-                            .getAttribute("id");
-                        if (
-                            modelIndex &&
-                            element.id == modelIndex.split("_")[0]
-                        ) {
-                            document.querySelector(
-                                ".model .project-name"
-                            ).value = element.options[0].children[0].valueRU;
-                        }
-                    }
-                }
             } else if (this.selectArray.selectName == "Пейзаж") {
                 this.additional.orientation =
                     optionName == "Пейзаж" ? "landscape" : "portrait";
