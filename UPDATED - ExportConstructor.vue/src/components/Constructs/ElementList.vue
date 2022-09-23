@@ -21,7 +21,6 @@
                     class="group__body group-bg"
                     :list="value.elements"
                     :move="checkMoveFromGroup"
-                    @dragleave="dragLeave"
                     animation="250"
                     handle=".handle"
                 >

@@ -9,7 +9,6 @@ export function createPDF() {
 
 		_function(newMap);
 
-
 		return newMap;
 	}
 
