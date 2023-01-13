@@ -1,0 +1,24 @@
+{
+	"nodes":[
+		{"id":"a13f1233b1d81907","x":-528,"y":-457,"width":107,"height":60,"type":"text","text":"Resources"},
+		{"id":"d3f1ea715a828284","x":-548,"y":-477,"width":511,"height":100,"type":"group","label":"Database"},
+		{"id":"d13562154732a490","x":-344,"y":-457,"width":114,"height":60,"type":"text","text":"Categories"},
+		{"id":"ea26156dba622c9c","x":-495,"y":-697,"width":148,"height":60,"type":"text","text":"Category Parser"},
+		{"id":"cd53dcb628f109e6","x":-292,"y":-697,"width":124,"height":60,"type":"text","text":"Links Parser"},
+		{"id":"9c9cd6a13d4f6daa","x":-105,"y":-697,"width":135,"height":60,"type":"text","text":"Items Parser"},
+		{"id":"19b33e6e9884626a","x":-185,"y":-457,"width":114,"height":60,"type":"text","text":"Items"},
+		{"id":"1e289886e50ce561","x":-230,"y":-270,"width":250,"height":60,"type":"text","text":"REST"},
+		{"id":"9616911840eb0e59","x":49,"y":-162,"width":78,"height":60,"type":"text","text":" Vue"}
+	],
+	"edges":[
+		{"id":"f1918b6fd6b44eb8","fromNode":"a13f1233b1d81907","fromSide":"left","toNode":"ea26156dba622c9c","toSide":"left"},
+		{"id":"d7608a969835e026","fromNode":"ea26156dba622c9c","fromSide":"bottom","toNode":"d13562154732a490","toSide":"left"},
+		{"id":"d3956cdafbd37231","fromNode":"1e289886e50ce561","fromSide":"right","toNode":"9616911840eb0e59","toSide":"top"},
+		{"id":"5dc05bc1b7c0ec06","fromNode":"9616911840eb0e59","fromSide":"left","toNode":"1e289886e50ce561","toSide":"bottom"},
+		{"id":"0d38250ede4aa9a0","fromNode":"1e289886e50ce561","fromSide":"left","toNode":"d3f1ea715a828284","toSide":"bottom"},
+		{"id":"7718411ce98793da","fromNode":"d3f1ea715a828284","fromSide":"bottom","toNode":"1e289886e50ce561","toSide":"top"},
+		{"id":"f14d7af4185522f1","fromNode":"9c9cd6a13d4f6daa","fromSide":"bottom","toNode":"19b33e6e9884626a","toSide":"top"},
+		{"id":"a088abae2ca9d323","fromNode":"cd53dcb628f109e6","fromSide":"right","toNode":"9c9cd6a13d4f6daa","toSide":"left"},
+		{"id":"abcf322eba522b4f","fromNode":"d13562154732a490","fromSide":"top","toNode":"cd53dcb628f109e6","toSide":"bottom"}
+	]
+}
